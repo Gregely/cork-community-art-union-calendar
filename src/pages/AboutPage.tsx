@@ -5,12 +5,12 @@ export function AboutPage() {
   return (
     <PageShell
       eyebrow="About"
-      title="A shared board for Cork culture"
-      intro="Cork Community Art Union Calendar is an MVP for a simple public listings board where arts groups, venues, and DIY organisers can share what is happening in the city."
+      title="Cork Culture Board"
+      intro="A free listings board where arts groups, venues, and organisers can share what's happening across Cork city. A Cork Community Arts Union project."
     >
       <div className="grid gap-5 md:grid-cols-3">
         {[
-          ["Public first", "Anyone can browse approved listings without creating an account."],
+          ["Public first", "Anyone can browse listings without creating an account."],
           ["Open submissions", "Organisers can send an event quickly, then moderators review it."],
           ["Small on purpose", "No comments, ticketing, feeds, or social machinery. Just the useful bits."],
         ].map(([title, body]) => (

@@ -6,7 +6,7 @@ export function SubmitEventPage() {
     <PageShell
       eyebrow="Open submissions"
       title="Submit an event"
-      intro="Send the basics in one short form. New submissions are saved as pending and reviewed before they appear publicly."
+      intro="Add your event to Cork Culture Board. Fill in the basics and it will be reviewed before it appears publicly."
     >
       <EventSubmissionForm />
     </PageShell>

@@ -99,14 +99,17 @@ export function HomePage() {
         <div className="mx-auto grid max-w-6xl gap-8 px-3 py-9 min-[360px]:px-4 sm:px-6 md:grid-cols-[1.15fr_0.85fr] md:items-center md:py-16">
           <div className="min-w-0">
             <p className="mb-4 w-fit max-w-full rotate-[-1deg] rounded-full border-2 border-ink bg-posterYellow px-3 py-2 text-xs font-black uppercase min-[360px]:px-4 min-[360px]:text-sm">
-              Cork city arts noticeboard
+              By Cork Community Arts Union
             </p>
             <h1 className="font-display text-4xl font-black leading-none min-[360px]:text-5xl sm:text-7xl">
-              Cork Community Art Union Calendar
+              Cork Culture Board
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-stone-700 sm:text-lg sm:leading-8">
-              A shared public calendar for exhibitions, gigs, workshops, screenings, readings, talks,
-              and handmade culture across Cork city.
+              A shared listings board for Cork's creative and cultural events.
+            </p>
+            <p className="mt-3 max-w-2xl text-base leading-7 text-stone-700 sm:text-lg sm:leading-8">
+              Find gigs, readings, exhibitions, workshops, theatre, film, open mics, and community
+              happenings across the city.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link className="button-primary bg-corkRed text-white" to="/events">
