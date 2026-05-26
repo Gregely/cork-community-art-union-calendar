@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { DisciplineBadge } from "../components/events/DisciplineBadge";
+import { ShareCardModal } from "../components/events/ShareCardModal";
 import { DisciplineChipPicker } from "../components/forms/DisciplineChipPicker";
 import { OrganiserAutocomplete } from "../components/forms/OrganiserAutocomplete";
 import { VenueAutocomplete } from "../components/forms/VenueAutocomplete";
@@ -53,6 +54,7 @@ export function AdminDashboardPage() {
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [confirmDeleteEventId, setConfirmDeleteEventId] = useState<string | null>(null);
+  const [shareCardEvent, setShareCardEvent] = useState<Event | null>(null);
 
   useEffect(() => {
     let isCurrent = true;
@@ -345,6 +347,10 @@ export function AdminDashboardPage() {
   }
 
   return (
+    <>
+    {shareCardEvent ? (
+      <ShareCardModal event={shareCardEvent} onClose={() => setShareCardEvent(null)} />
+    ) : null}
     <PageShell
       eyebrow="Moderation"
       title="Admin dashboard"
@@ -466,6 +472,14 @@ export function AdminDashboardPage() {
                         ) : null}
                       </div>
                       <div className="grid w-full grid-cols-1 gap-3 min-[360px]:grid-cols-2 lg:w-48 lg:grid-cols-1">
+                        <button
+                          type="button"
+                          onClick={() => setShareCardEvent(event)}
+                          disabled={isBusy || isConfirmingDelete}
+                          className="min-h-11 rounded-full border-2 border-ink bg-white px-4 py-3 text-sm font-black text-ink disabled:cursor-not-allowed disabled:opacity-60 hover:bg-posterYellow"
+                        >
+                          Share card
+                        </button>
                         <button
                           type="button"
                           onClick={() => void handleUnpublish(event.id)}
@@ -604,6 +618,7 @@ export function AdminDashboardPage() {
         ) : null}
       </section>
     </PageShell>
+    </>
   );
 }
 

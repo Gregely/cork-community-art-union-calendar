@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { DisciplineBadge } from "../components/events/DisciplineBadge";
+import { EventShareButton } from "../components/events/EventShareButton";
 import { PageShell } from "../components/layout/PageShell";
 import { EmptyState } from "../components/shared/EmptyState";
 import { ErrorState } from "../components/shared/ErrorState";
@@ -16,7 +17,6 @@ export function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-
   useEffect(() => {
     let isCurrent = true;
 
@@ -144,6 +144,9 @@ export function EventDetailPage() {
                 </>
               )}
             </div>
+          </div>
+          <div className="mt-4">
+            <EventShareButton event={event} />
           </div>
         </article>
         <aside className="h-fit rounded-2xl border-2 border-ink bg-posterYellow p-5 shadow-poster">
