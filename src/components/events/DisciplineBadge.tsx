@@ -1,6 +1,4 @@
-import type { Discipline } from "../../types/event";
-
-const badgeStyles: Record<Discipline, string> = {
+const badgeStyles: Record<string, string> = {
   Exhibition: "bg-pinkPunch text-white",
   Music: "bg-leeBlue text-white",
   Theatre: "bg-corkRed text-white",
@@ -10,15 +8,15 @@ const badgeStyles: Record<Discipline, string> = {
   Workshop: "bg-posterYellow text-ink",
   Talk: "bg-orange-500 text-white",
   Community: "bg-teal-500 text-white",
-  Multidisciplinary: "bg-lime-400 text-ink",
+  Multidisciplinary: "bg-lime-400 text-ink", // legacy — kept for existing events
 };
 
 type DisciplineBadgeProps = {
-  discipline: Discipline | string;
+  discipline: string;
 };
 
 export function DisciplineBadge({ discipline }: DisciplineBadgeProps) {
-  const style = badgeStyles[discipline as Discipline] ?? "bg-white text-ink";
+  const style = badgeStyles[discipline] ?? "bg-white text-ink";
 
   return (
     <span

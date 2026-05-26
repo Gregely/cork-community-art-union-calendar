@@ -53,9 +53,11 @@ export async function updatePendingEvent(eventId: string, input: EventUpdate): P
     organiser_id,
     organiser,
     discipline,
+    disciplines,
     description,
     link_or_ticket_info,
     image_url,
+    manual_maps_url,
     submitter_name,
     submitter_email,
     admin_notes,
@@ -73,9 +75,11 @@ export async function updatePendingEvent(eventId: string, input: EventUpdate): P
       organiser_id,
       organiser,
       discipline,
+      disciplines,
       description,
       link_or_ticket_info,
       image_url,
+      manual_maps_url,
       submitter_name,
       submitter_email,
       admin_notes,
@@ -90,6 +94,52 @@ export async function updatePendingEvent(eventId: string, input: EventUpdate): P
   }
 
   return data as Event;
+}
+
+export async function getApprovedEventsForAdmin(): Promise<Event[]> {
+  const { data, error } = await getSupabaseClient()
+    .from("events")
+    .select("*, venue_record:venues(*), organiser_record:organisers(*)")
+    .eq("status", "approved")
+    .order("event_date", { ascending: true })
+    .order("start_time", { ascending: true });
+
+  if (error) {
+    throw new Error(`Could not load approved events: ${error.message}`);
+  }
+
+  return (data ?? []) as Event[];
+}
+
+export async function unpublishEvent(eventId: string): Promise<Event> {
+  const { data, error } = await getSupabaseClient()
+    .from("events")
+    .update({
+      status: "rejected",
+      approved_at: null,
+      approved_by: null,
+    })
+    .eq("id", eventId)
+    .eq("status", "approved")
+    .select("*, venue_record:venues(*), organiser_record:organisers(*)")
+    .single();
+
+  if (error) {
+    throw new Error(`Could not unpublish this event: ${error.message}`);
+  }
+
+  return data as Event;
+}
+
+export async function deleteEvent(eventId: string): Promise<void> {
+  const { error } = await getSupabaseClient()
+    .from("events")
+    .delete()
+    .eq("id", eventId);
+
+  if (error) {
+    throw new Error(`Could not delete this event: ${error.message}`);
+  }
 }
 
 export async function rejectEvent(eventId: string): Promise<Event> {

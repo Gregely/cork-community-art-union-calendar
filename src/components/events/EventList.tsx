@@ -4,14 +4,16 @@ import { EventCard } from "./EventCard";
 
 type EventListProps = {
   events: CalendarEvent[];
+  emptyTitle?: string;
+  emptyMessage?: string;
 };
 
-export function EventList({ events }: EventListProps) {
+export function EventList({ events, emptyTitle, emptyMessage }: EventListProps) {
   if (events.length === 0) {
     return (
       <EmptyState
-        title="No events on the board yet"
-        message="Try changing the filters, or check back when more Cork arts listings have been approved."
+        title={emptyTitle ?? "No events on the board yet"}
+        message={emptyMessage ?? "Try changing the filters, or check back when more Cork arts listings have been approved."}
       />
     );
   }

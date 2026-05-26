@@ -9,8 +9,7 @@ export type Discipline =
   | "Poetry"
   | "Workshop"
   | "Talk"
-  | "Community"
-  | "Multidisciplinary";
+  | "Community";
 
 export type Event = {
   id: string;
@@ -22,10 +21,12 @@ export type Event = {
   venue: string;
   organiser_id: string | null;
   organiser: string;
-  discipline: Discipline | string;
+  discipline: string;
+  disciplines: string[];
   description: string | null;
   link_or_ticket_info: string;
   image_url: string | null;
+  manual_maps_url: string | null;
   status: EventStatus;
   submitter_name: string | null;
   submitter_email: string | null;
@@ -48,10 +49,12 @@ export type EventInsert = {
   venue: string;
   organiser_id?: string | null;
   organiser: string;
-  discipline: Discipline | string;
+  discipline: string;
+  disciplines?: string[];
   description?: string | null;
   link_or_ticket_info: string;
   image_url?: string | null;
+  manual_maps_url?: string | null;
   status?: EventStatus;
   submitter_name?: string | null;
   submitter_email?: string | null;
@@ -120,5 +123,11 @@ export const disciplines: Discipline[] = [
   "Workshop",
   "Talk",
   "Community",
-  "Multidisciplinary",
 ];
+
+/** Returns the disciplines array for an event, falling back to [discipline] for older rows. */
+export function getEventDisciplines(event: Pick<Event, "disciplines" | "discipline">): string[] {
+  if (event.disciplines && event.disciplines.length > 0) return event.disciplines;
+  if (event.discipline) return [event.discipline];
+  return [];
+}

@@ -1,9 +1,9 @@
 import { FormEvent, ReactNode, useState } from "react";
+import { DisciplineChipPicker } from "./DisciplineChipPicker";
 import { OrganiserAutocomplete } from "./OrganiserAutocomplete";
 import { VenueAutocomplete } from "./VenueAutocomplete";
 import { submitEvent } from "../../lib/eventMutations";
-import { disciplines } from "../../types/event";
-import type { Discipline, EventInsert } from "../../types/event";
+import type { EventInsert } from "../../types/event";
 
 type SubmissionFormState = {
   title: string;
@@ -12,9 +12,10 @@ type SubmissionFormState = {
   end_time: string;
   venue_id: string | null;
   venue: string;
+  manual_maps_url: string;
   organiser_id: string | null;
   organiser: string;
-  discipline: "" | Discipline;
+  disciplines: string[];
   link_or_ticket_info: string;
   image_url: string;
   submitter_name: string;
@@ -29,9 +30,10 @@ const initialFormState: SubmissionFormState = {
   end_time: "",
   venue_id: null,
   venue: "",
+  manual_maps_url: "",
   organiser_id: null,
   organiser: "",
-  discipline: "",
+  disciplines: [],
   link_or_ticket_info: "",
   image_url: "",
   submitter_name: "",
@@ -46,23 +48,22 @@ export function EventSubmissionForm() {
   const [errorMessage, setErrorMessage] = useState("");
 
   function updateField(field: keyof SubmissionFormState, value: string) {
-    setFormState((currentState) => ({
-      ...currentState,
-      [field]: value,
-    }));
+    setFormState((curr) => ({ ...curr, [field]: value }));
   }
 
   function updateVenue(venueName: string, venueId: string | null) {
-    setFormState((currentState) => ({
-      ...currentState,
+    setFormState((curr) => ({
+      ...curr,
       venue: venueName,
       venue_id: venueId,
+      // Clear manual maps link when a saved venue is selected
+      manual_maps_url: venueId !== null ? "" : curr.manual_maps_url,
     }));
   }
 
   function updateOrganiser(organiserName: string, organiserId: string | null) {
-    setFormState((currentState) => ({
-      ...currentState,
+    setFormState((curr) => ({
+      ...curr,
       organiser: organiserName,
       organiser_id: organiserId,
     }));
@@ -78,21 +79,13 @@ export function EventSubmissionForm() {
   }
 
   function validateForm() {
-    const requiredFields: Array<[Exclude<keyof SubmissionFormState, "venue_id" | "organiser_id">, string]> = [
-      ["title", "Event title is required."],
-      ["event_date", "Event date is required."],
-      ["start_time", "Start time is required."],
-      ["venue", "Venue is required."],
-      ["organiser", "Organiser is required."],
-      ["discipline", "Discipline is required."],
-      ["link_or_ticket_info", "Link or ticket info is required."],
-    ];
-
-    for (const [field, message] of requiredFields) {
-      if (!formState[field].trim()) {
-        return message;
-      }
-    }
+    if (!formState.title.trim()) return "Event title is required.";
+    if (!formState.event_date) return "Event date is required.";
+    if (!formState.start_time) return "Start time is required.";
+    if (!formState.venue.trim()) return "Venue is required.";
+    if (!formState.organiser.trim()) return "Organiser is required.";
+    if (formState.disciplines.length === 0) return "At least one discipline is required.";
+    if (!formState.link_or_ticket_info.trim()) return "Link or ticket info is required.";
 
     if (formState.event_date < getTodayLocalDate()) {
       return "Event date cannot be in the past.";
@@ -100,9 +93,16 @@ export function EventSubmissionForm() {
 
     if (formState.submitter_email.trim()) {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
       if (!emailPattern.test(formState.submitter_email.trim())) {
         return "Submitter email should look like name@example.com.";
+      }
+    }
+
+    if (formState.manual_maps_url.trim()) {
+      try {
+        new URL(formState.manual_maps_url.trim());
+      } catch {
+        return "Maps link must be a valid URL (e.g. https://maps.google.com/...).";
       }
     }
 
@@ -130,7 +130,9 @@ export function EventSubmissionForm() {
       venue: formState.venue.trim(),
       organiser_id: formState.organiser_id,
       organiser: formState.organiser.trim(),
-      discipline: formState.discipline,
+      discipline: formState.disciplines[0] ?? "",
+      disciplines: formState.disciplines,
+      manual_maps_url: formState.venue_id ? null : (formState.manual_maps_url.trim() || null),
       link_or_ticket_info: formState.link_or_ticket_info.trim(),
       image_url: formState.image_url.trim() || null,
       submitter_name: formState.submitter_name.trim() || null,
@@ -143,11 +145,11 @@ export function EventSubmissionForm() {
       setIsSubmitting(true);
       await submitEvent(input);
       setSuccessMessage("Thanks — your event has been sent for review.");
-      setFormState((currentState) => ({
+      setFormState((curr) => ({
         ...initialFormState,
-        organiser: currentState.organiser,
-        submitter_name: currentState.submitter_name,
-        submitter_email: currentState.submitter_email,
+        organiser: curr.organiser,
+        submitter_name: curr.submitter_name,
+        submitter_email: curr.submitter_email,
       }));
     } catch (error) {
       setErrorMessage(
@@ -159,6 +161,8 @@ export function EventSubmissionForm() {
       setIsSubmitting(false);
     }
   }
+
+  const isManualVenue = formState.venue_id === null;
 
   return (
     <form onSubmit={handleSubmit} className="rounded-2xl border-2 border-ink bg-white p-5 shadow-poster sm:p-6">
@@ -178,7 +182,7 @@ export function EventSubmissionForm() {
             required
             name="title"
             value={formState.title}
-            onChange={(event) => updateField("title", event.target.value)}
+            onChange={(e) => updateField("title", e.target.value)}
             className="form-input"
             placeholder="e.g. Print night at the studio"
           />
@@ -190,7 +194,7 @@ export function EventSubmissionForm() {
             type="date"
             min={getTodayLocalDate()}
             value={formState.event_date}
-            onChange={(event) => updateField("event_date", event.target.value)}
+            onChange={(e) => updateField("event_date", e.target.value)}
             className="form-input"
           />
         </Field>
@@ -200,7 +204,7 @@ export function EventSubmissionForm() {
             name="start_time"
             type="time"
             value={formState.start_time}
-            onChange={(event) => updateField("start_time", event.target.value)}
+            onChange={(e) => updateField("start_time", e.target.value)}
             className="form-input"
           />
         </Field>
@@ -209,7 +213,7 @@ export function EventSubmissionForm() {
             name="end_time"
             type="time"
             value={formState.end_time}
-            onChange={(event) => updateField("end_time", event.target.value)}
+            onChange={(e) => updateField("end_time", e.target.value)}
             className="form-input"
           />
         </Field>
@@ -219,34 +223,40 @@ export function EventSubmissionForm() {
           selectedVenueId={formState.venue_id}
           onChange={updateVenue}
         />
+        {/* Maps link — only when no saved venue is selected */}
+        {isManualVenue && formState.venue.trim() ? (
+          <Field label="Maps link">
+            <input
+              name="manual_maps_url"
+              type="url"
+              value={formState.manual_maps_url}
+              onChange={(e) => updateField("manual_maps_url", e.target.value)}
+              className="form-input"
+              placeholder="https://maps.google.com/..."
+            />
+            <p className="mt-1 text-xs font-bold text-stone-500">
+              Optional. Paste a Google or Apple Maps link for this venue.
+            </p>
+          </Field>
+        ) : null}
         <OrganiserAutocomplete
           required
           value={formState.organiser}
           selectedOrganiserId={formState.organiser_id}
           onChange={updateOrganiser}
         />
-        <Field label="Discipline" required>
-          <select
-            required
-            name="discipline"
-            value={formState.discipline}
-            onChange={(event) => updateField("discipline", event.target.value)}
-            className="form-input"
-          >
-            <option value="">Choose one</option>
-            {disciplines.map((discipline) => (
-              <option key={discipline} value={discipline}>
-                {discipline}
-              </option>
-            ))}
-          </select>
-        </Field>
+        <DisciplineChipPicker
+          selectedDisciplines={formState.disciplines}
+          onChange={(disciplines) => setFormState((curr) => ({ ...curr, disciplines }))}
+          required
+          className="md:col-span-2"
+        />
         <Field label="Link or ticket info" required>
           <input
             required
             name="link_or_ticket_info"
             value={formState.link_or_ticket_info}
-            onChange={(event) => updateField("link_or_ticket_info", event.target.value)}
+            onChange={(e) => updateField("link_or_ticket_info", e.target.value)}
             className="form-input"
             placeholder="URL, email, free entry, or door price"
           />
@@ -256,7 +266,7 @@ export function EventSubmissionForm() {
             name="image_url"
             type="url"
             value={formState.image_url}
-            onChange={(event) => updateField("image_url", event.target.value)}
+            onChange={(e) => updateField("image_url", e.target.value)}
             className="form-input"
             placeholder="https://..."
           />
@@ -265,7 +275,7 @@ export function EventSubmissionForm() {
           <input
             name="submitter_name"
             value={formState.submitter_name}
-            onChange={(event) => updateField("submitter_name", event.target.value)}
+            onChange={(e) => updateField("submitter_name", e.target.value)}
             className="form-input"
             placeholder="Optional"
           />
@@ -275,7 +285,7 @@ export function EventSubmissionForm() {
             name="submitter_email"
             type="email"
             value={formState.submitter_email}
-            onChange={(event) => updateField("submitter_email", event.target.value)}
+            onChange={(e) => updateField("submitter_email", e.target.value)}
             className="form-input"
             placeholder="For moderation questions"
           />
@@ -284,7 +294,7 @@ export function EventSubmissionForm() {
           <textarea
             name="description"
             value={formState.description}
-            onChange={(event) => updateField("description", event.target.value)}
+            onChange={(e) => updateField("description", e.target.value)}
             className="form-input min-h-32 resize-y"
             placeholder="A few friendly lines about the event."
           />

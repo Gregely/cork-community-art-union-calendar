@@ -8,6 +8,7 @@ import { LoadingState } from "../components/shared/LoadingState";
 import { getApprovedEventById } from "../lib/eventQueries";
 import { getVenueMapLinks } from "../lib/venueQueries";
 import type { Event } from "../types/event";
+import { getEventDisciplines } from "../types/event";
 import { formatDate, formatTimeRange } from "../utils/date";
 
 export function EventDetailPage() {
@@ -78,18 +79,25 @@ export function EventDetailPage() {
     );
   }
 
+  const eventDisciplines = getEventDisciplines(event);
+  const hasSavedMaps = !!(event.venue_record?.google_maps_url || event.venue_record?.apple_maps_url);
   const mapLinks = getVenueMapLinks({
     venueName: event.venue,
     venueAddress: event.venue_record?.address,
     googleMapsUrl: event.venue_record?.google_maps_url,
     appleMapsUrl: event.venue_record?.apple_maps_url,
+    manualMapsUrl: event.manual_maps_url,
   });
 
   return (
-    <PageShell eyebrow={event.discipline} title={event.title}>
+    <PageShell eyebrow={eventDisciplines[0]} title={event.title}>
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
         <article className="rounded-2xl border-2 border-ink bg-white p-4 shadow-poster sm:p-6">
-          <DisciplineBadge discipline={event.discipline} />
+          <div className="flex flex-wrap gap-1.5">
+            {eventDisciplines.map((d) => (
+              <DisciplineBadge key={d} discipline={d} />
+            ))}
+          </div>
           <dl className="mt-6 grid gap-4 sm:grid-cols-2">
             <Detail label="Date" value={formatDate(event.event_date)} />
             <Detail label="Time" value={formatTimeRange(event.start_time, event.end_time)} />
@@ -104,22 +112,37 @@ export function EventDetailPage() {
           <div className="mt-4 rounded-2xl border-2 border-dashed border-ink bg-paper p-4">
             <p className="text-sm font-black uppercase text-corkRed">Maps</p>
             <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-              <a
-                href={mapLinks.googleMapsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink bg-white px-4 py-2 text-center text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
-              >
-                Google Maps
-              </a>
-              <a
-                href={mapLinks.appleMapsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink bg-white px-4 py-2 text-center text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
-              >
-                Apple Maps
-              </a>
+              {mapLinks.isManualOnly ? (
+                <a
+                  href={mapLinks.googleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink bg-white px-4 py-2 text-center text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
+                >
+                  Open in Maps
+                </a>
+              ) : (
+                <>
+                  <a
+                    href={mapLinks.googleMapsUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink bg-white px-4 py-2 text-center text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
+                  >
+                    {hasSavedMaps ? "Google Maps" : "Open in Google Maps"}
+                  </a>
+                  {mapLinks.appleMapsUrl ? (
+                    <a
+                      href={mapLinks.appleMapsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink bg-white px-4 py-2 text-center text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
+                    >
+                      {hasSavedMaps ? "Apple Maps" : "Open in Apple Maps"}
+                    </a>
+                  ) : null}
+                </>
+              )}
             </div>
           </div>
         </article>

@@ -2,16 +2,17 @@ import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { DisciplineBadge } from "../components/events/DisciplineBadge";
+import { DisciplineChipPicker } from "../components/forms/DisciplineChipPicker";
 import { OrganiserAutocomplete } from "../components/forms/OrganiserAutocomplete";
 import { VenueAutocomplete } from "../components/forms/VenueAutocomplete";
 import { PageShell } from "../components/layout/PageShell";
 import { EmptyState } from "../components/shared/EmptyState";
 import { ErrorState } from "../components/shared/ErrorState";
 import { LoadingState } from "../components/shared/LoadingState";
-import { approveEvent, getPendingEvents, rejectEvent, updatePendingEvent } from "../lib/adminEventQueries";
+import { approveEvent, deleteEvent, getApprovedEventsForAdmin, getPendingEvents, rejectEvent, unpublishEvent, updatePendingEvent } from "../lib/adminEventQueries";
 import { getCurrentUser, isCurrentUserAdmin, signOut } from "../lib/auth";
-import { disciplines } from "../types/event";
-import type { Discipline, Event, EventUpdate } from "../types/event";
+import type { Event, EventUpdate } from "../types/event";
+import { getEventDisciplines } from "../types/event";
 import { formatDate, formatDateTime, formatTimeRange } from "../utils/date";
 
 type EditFormState = {
@@ -23,7 +24,8 @@ type EditFormState = {
   venue: string;
   organiser_id: string | null;
   organiser: string;
-  discipline: string;
+  disciplines: string[];
+  manual_maps_url: string;
   description: string;
   link_or_ticket_info: string;
   image_url: string;
@@ -32,19 +34,25 @@ type EditFormState = {
   admin_notes: string;
 };
 
+type AdminTab = "pending" | "approved";
+
 export function AdminDashboardPage() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<AdminTab>("pending");
   const [pendingEvents, setPendingEvents] = useState<Event[]>([]);
+  const [approvedEvents, setApprovedEvents] = useState<Event[]>([]);
   const [adminUser, setAdminUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCheckingAccess, setIsCheckingAccess] = useState(true);
   const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+  const [isLoadingApproved, setIsLoadingApproved] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [updatingEventId, setUpdatingEventId] = useState<string | null>(null);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [confirmDeleteEventId, setConfirmDeleteEventId] = useState<string | null>(null);
 
   useEffect(() => {
     let isCurrent = true;
@@ -69,10 +77,15 @@ export function AdminDashboardPage() {
 
         if (admin) {
           setIsLoadingEvents(true);
-          const submissions = await getPendingEvents();
+          setIsLoadingApproved(true);
+          const [submissions, approved] = await Promise.all([
+            getPendingEvents(),
+            getApprovedEventsForAdmin(),
+          ]);
 
           if (isCurrent) {
             setPendingEvents(submissions);
+            setApprovedEvents(approved);
           }
         }
       } catch (error) {
@@ -83,6 +96,7 @@ export function AdminDashboardPage() {
         if (isCurrent) {
           setIsCheckingAccess(false);
           setIsLoadingEvents(false);
+          setIsLoadingApproved(false);
         }
       }
     }
@@ -110,7 +124,7 @@ export function AdminDashboardPage() {
     try {
       setUpdatingEventId(eventId);
       await approveEvent(eventId);
-      setPendingEvents((currentEvents) => currentEvents.filter((event) => event.id !== eventId));
+      setPendingEvents((curr) => curr.filter((e) => e.id !== eventId));
       setSuccessMessage("Event approved. It is now public.");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Could not approve this event.");
@@ -126,7 +140,7 @@ export function AdminDashboardPage() {
     try {
       setUpdatingEventId(eventId);
       await rejectEvent(eventId);
-      setPendingEvents((currentEvents) => currentEvents.filter((event) => event.id !== eventId));
+      setPendingEvents((curr) => curr.filter((e) => e.id !== eventId));
       setSuccessMessage("Event rejected. It will stay off the public calendar.");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Could not reject this event.");
@@ -135,13 +149,37 @@ export function AdminDashboardPage() {
     }
   }
 
-  function getTodayLocalDate() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
+  async function handleUnpublish(eventId: string) {
+    setErrorMessage("");
+    setSuccessMessage("");
 
-    return `${year}-${month}-${day}`;
+    try {
+      setUpdatingEventId(eventId);
+      await unpublishEvent(eventId);
+      setApprovedEvents((curr) => curr.filter((e) => e.id !== eventId));
+      setSuccessMessage("Event unpublished. It is no longer public.");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Could not unpublish this event.");
+    } finally {
+      setUpdatingEventId(null);
+    }
+  }
+
+  async function handleDelete(eventId: string) {
+    setErrorMessage("");
+    setSuccessMessage("");
+    setConfirmDeleteEventId(null);
+
+    try {
+      setUpdatingEventId(eventId);
+      await deleteEvent(eventId);
+      setApprovedEvents((curr) => curr.filter((e) => e.id !== eventId));
+      setSuccessMessage("Event permanently deleted.");
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Could not delete this event. It may be linked to other records.");
+    } finally {
+      setUpdatingEventId(null);
+    }
   }
 
   function toEditForm(event: Event): EditFormState {
@@ -154,7 +192,8 @@ export function AdminDashboardPage() {
       venue: event.venue,
       organiser_id: event.organiser_id,
       organiser: event.organiser,
-      discipline: event.discipline,
+      disciplines: getEventDisciplines(event),
+      manual_maps_url: event.manual_maps_url ?? "",
       description: event.description ?? "",
       link_or_ticket_info: event.link_or_ticket_info,
       image_url: event.image_url ?? "",
@@ -178,35 +217,34 @@ export function AdminDashboardPage() {
   }
 
   function updateEditField<K extends keyof EditFormState>(field: K, value: EditFormState[K]) {
-    setEditForm((currentForm) => currentForm ? { ...currentForm, [field]: value } : currentForm);
+    setEditForm((curr) => curr ? { ...curr, [field]: value } : curr);
   }
 
   function validateEditForm(form: EditFormState) {
-    const requiredFields: Array<[Exclude<keyof EditFormState, "venue_id" | "organiser_id">, string]> = [
-      ["title", "Event title is required."],
-      ["event_date", "Event date is required."],
-      ["start_time", "Start time is required."],
-      ["venue", "Venue is required."],
-      ["organiser", "Organiser is required."],
-      ["discipline", "Discipline is required."],
-      ["link_or_ticket_info", "Link or ticket info is required."],
-    ];
+    if (!form.title.trim()) return "Event title is required.";
+    if (!form.event_date) return "Event date is required.";
+    if (!form.start_time) return "Start time is required.";
+    if (!form.venue.trim()) return "Venue is required.";
+    if (!form.organiser.trim()) return "Organiser is required.";
+    if (form.disciplines.length === 0) return "At least one discipline is required.";
+    if (!form.link_or_ticket_info.trim()) return "Link or ticket info is required.";
 
-    for (const [field, message] of requiredFields) {
-      if (!form[field].trim()) {
-        return message;
-      }
-    }
-
-    if (form.event_date < getTodayLocalDate()) {
+    if (form.event_date < getTodayForInput()) {
       return "Event date cannot be in the past.";
     }
 
     if (form.submitter_email.trim()) {
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
       if (!emailPattern.test(form.submitter_email.trim())) {
         return "Submitter email should look like name@example.com.";
+      }
+    }
+
+    if (form.manual_maps_url.trim()) {
+      try {
+        new URL(form.manual_maps_url.trim());
+      } catch {
+        return "Maps link must be a valid URL.";
       }
     }
 
@@ -235,7 +273,9 @@ export function AdminDashboardPage() {
       venue: editForm.venue.trim(),
       organiser_id: editForm.organiser_id,
       organiser: editForm.organiser.trim(),
-      discipline: editForm.discipline.trim(),
+      discipline: editForm.disciplines[0] ?? "",
+      disciplines: editForm.disciplines,
+      manual_maps_url: editForm.venue_id ? null : (editForm.manual_maps_url.trim() || null),
       description: editForm.description.trim() || null,
       link_or_ticket_info: editForm.link_or_ticket_info.trim(),
       image_url: editForm.image_url.trim() || null,
@@ -248,8 +288,8 @@ export function AdminDashboardPage() {
       setIsSavingEdit(true);
       setUpdatingEventId(eventId);
       const updatedEvent = await updatePendingEvent(eventId, input);
-      setPendingEvents((currentEvents) =>
-        currentEvents.map((event) => (event.id === eventId ? updatedEvent : event)),
+      setPendingEvents((curr) =>
+        curr.map((e) => (e.id === eventId ? updatedEvent : e)),
       );
       setEditingEventId(null);
       setEditForm(null);
@@ -324,8 +364,24 @@ export function AdminDashboardPage() {
         </button>
       </div>
       <div className="mb-6 grid gap-2 min-[360px]:grid-cols-2">
-        <Link to="/admin" className="button-primary bg-ink text-paper">Pending submissions</Link>
+        <Link to="/admin" className="button-primary bg-ink text-paper">Moderation</Link>
         <Link to="/admin/data" className="button-primary bg-white text-ink">Manage venues/organisers</Link>
+      </div>
+      <div className="mb-6 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => { setActiveTab("pending"); setErrorMessage(""); setSuccessMessage(""); setConfirmDeleteEventId(null); }}
+          className={`min-h-11 rounded-full border-2 border-ink px-4 py-2 text-sm font-black ${activeTab === "pending" ? "bg-ink text-paper" : "bg-white text-ink hover:bg-posterYellow"}`}
+        >
+          Pending{pendingEvents.length > 0 ? ` (${pendingEvents.length})` : ""}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setActiveTab("approved"); setErrorMessage(""); setSuccessMessage(""); setConfirmDeleteEventId(null); }}
+          className={`min-h-11 rounded-full border-2 border-ink px-4 py-2 text-sm font-black ${activeTab === "approved" ? "bg-ink text-paper" : "bg-white text-ink hover:bg-posterYellow"}`}
+        >
+          Approved{approvedEvents.length > 0 ? ` (${approvedEvents.length})` : ""}
+        </button>
       </div>
       {successMessage ? (
         <div className="mb-6 rounded-2xl border-2 border-ink bg-grass p-4 text-sm font-black text-white shadow-poster">
@@ -337,7 +393,106 @@ export function AdminDashboardPage() {
           <ErrorState message={errorMessage} />
         </div>
       ) : null}
-      <section className="space-y-5">
+
+      {/* Approved tab */}
+      {activeTab === "approved" ? (
+        <section className="space-y-5">
+          {isLoadingApproved ? <LoadingState message="Loading approved events..." /> : null}
+          {!isLoadingApproved && approvedEvents.length === 0 ? (
+            <EmptyState
+              title="No approved events"
+              message="Events you approve will appear here."
+            />
+          ) : null}
+          {!isLoadingApproved && approvedEvents.length > 0
+            ? approvedEvents.map((event) => {
+                const isPast = event.event_date < getTodayForInput();
+                const isConfirmingDelete = confirmDeleteEventId === event.id;
+                const isBusy = updatingEventId === event.id;
+                const eventDisciplines = getEventDisciplines(event);
+
+                return (
+                  <article key={event.id} className="rounded-2xl border-2 border-ink bg-white p-4 shadow-poster sm:p-5">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0 space-y-3">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {eventDisciplines.map((d) => (
+                            <DisciplineBadge key={d} discipline={d} />
+                          ))}
+                          {isPast ? (
+                            <span className="inline-flex items-center rounded-full border-2 border-ink bg-stone-200 px-3 py-1 text-xs font-black uppercase">
+                              Past event
+                            </span>
+                          ) : null}
+                        </div>
+                        <div>
+                          <h2 className="font-display text-2xl font-black min-[360px]:text-3xl">{event.title}</h2>
+                          <p className="mt-2 text-sm font-bold text-leeBlue">
+                            {formatDate(event.event_date)} at {formatTimeRange(event.start_time, event.end_time)}
+                          </p>
+                        </div>
+                        <p className="text-sm">
+                          <span className="font-black">Venue:</span> {event.venue}
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-black">Organiser:</span> {event.organiser}
+                        </p>
+                        <p className="text-sm">
+                          <span className="font-black">Link/ticket info:</span> {event.link_or_ticket_info}
+                        </p>
+                        {isConfirmingDelete ? (
+                          <div className="rounded-xl border-2 border-corkRed bg-red-50 p-3">
+                            <p className="text-sm font-black text-corkRed">Delete this event permanently?</p>
+                            <p className="mt-1 text-xs text-stone-700">This cannot be undone. The event record will be gone forever.</p>
+                            <div className="mt-3 flex flex-col gap-2 min-[360px]:flex-row">
+                              <button
+                                type="button"
+                                onClick={() => void handleDelete(event.id)}
+                                disabled={isBusy}
+                                className="min-h-10 rounded-full border-2 border-corkRed bg-corkRed px-4 py-2 text-sm font-black text-white disabled:opacity-60"
+                              >
+                                {isBusy ? "Deleting..." : "Yes, delete forever"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteEventId(null)}
+                                disabled={isBusy}
+                                className="min-h-10 rounded-full border-2 border-ink bg-white px-4 py-2 text-sm font-black disabled:opacity-60"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                      <div className="grid w-full grid-cols-1 gap-3 min-[360px]:grid-cols-2 lg:w-48 lg:grid-cols-1">
+                        <button
+                          type="button"
+                          onClick={() => void handleUnpublish(event.id)}
+                          disabled={isBusy || isConfirmingDelete}
+                          className="min-h-11 rounded-full border-2 border-ink bg-posterYellow px-4 py-3 text-sm font-black text-ink disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isBusy && !isConfirmingDelete ? "Working..." : "Unpublish"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDeleteEventId(event.id)}
+                          disabled={isBusy || isConfirmingDelete}
+                          className="min-h-11 rounded-full border-2 border-corkRed bg-white px-4 py-3 text-sm font-black text-corkRed disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })
+            : null}
+        </section>
+      ) : null}
+
+      {/* Pending tab */}
+      <section className={`space-y-5 ${activeTab === "pending" ? "" : "hidden"}`}>
         {isLoadingEvents ? <LoadingState message="Loading pending submissions..." /> : null}
         {!isLoadingEvents && pendingEvents.length === 0 ? (
           <EmptyState
@@ -346,94 +501,106 @@ export function AdminDashboardPage() {
           />
         ) : null}
         {!isLoadingEvents && pendingEvents.length > 0 ? (
-          pendingEvents.map((event) => (
-            <article key={event.id} className="rounded-2xl border-2 border-ink bg-white p-4 shadow-poster sm:p-5">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 space-y-3">
-                  <DisciplineBadge discipline={event.discipline} />
-                  <div>
-                    <h2 className="font-display text-2xl font-black min-[360px]:text-3xl">{event.title}</h2>
-                    <p className="mt-2 text-sm font-bold text-leeBlue">
-                      {formatDate(event.event_date)} at{" "}
-                      {formatTimeRange(event.start_time, event.end_time)}
+          pendingEvents.map((event) => {
+            const eventDisciplines = getEventDisciplines(event);
+            return (
+              <article key={event.id} className="rounded-2xl border-2 border-ink bg-white p-4 shadow-poster sm:p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="min-w-0 space-y-3">
+                    <div className="flex flex-wrap gap-1.5">
+                      {eventDisciplines.map((d) => (
+                        <DisciplineBadge key={d} discipline={d} />
+                      ))}
+                    </div>
+                    <div>
+                      <h2 className="font-display text-2xl font-black min-[360px]:text-3xl">{event.title}</h2>
+                      <p className="mt-2 text-sm font-bold text-leeBlue">
+                        {formatDate(event.event_date)} at{" "}
+                        {formatTimeRange(event.start_time, event.end_time)}
+                      </p>
+                    </div>
+                    <p className="max-w-2xl text-sm leading-6 text-stone-700">
+                      {event.description || "No description supplied."}
                     </p>
+                    <p className="text-sm">
+                      <span className="font-black">Venue:</span> {event.venue}
+                      {event.venue_id ? <span className="ml-2 text-xs font-bold text-grass">(saved venue)</span> : null}
+                    </p>
+                    {event.manual_maps_url ? (
+                      <p className="break-all text-sm">
+                        <span className="font-black">Maps link:</span> {event.manual_maps_url}
+                      </p>
+                    ) : null}
+                    <p className="text-sm">
+                      <span className="font-black">Organiser:</span> {event.organiser}
+                      {event.organiser_id ? <span className="ml-2 text-xs font-bold text-grass">(saved organiser)</span> : null}
+                    </p>
+                    <p className="text-sm">
+                      <span className="font-black">Link/ticket info:</span> {event.link_or_ticket_info}
+                    </p>
+                    {event.image_url ? (
+                      <p className="break-all text-sm">
+                        <span className="font-black">Image URL:</span> {event.image_url}
+                      </p>
+                    ) : null}
+                    {event.submitter_name ? (
+                      <p className="text-sm">
+                        <span className="font-black">Submitter:</span> {event.submitter_name}
+                      </p>
+                    ) : null}
+                    {event.submitter_email ? (
+                      <p className="break-all text-sm">
+                        <span className="font-black">Submitter email:</span> {event.submitter_email}
+                      </p>
+                    ) : null}
+                    {event.admin_notes ? (
+                      <p className="text-sm">
+                        <span className="font-black">Admin notes:</span> {event.admin_notes}
+                      </p>
+                    ) : null}
+                    <p className="text-sm">
+                      <span className="font-black">Submitted:</span> {formatDateTime(event.created_at)}
+                    </p>
+                    {editingEventId === event.id && editForm ? (
+                      <EditPanel
+                        form={editForm}
+                        isSaving={isSavingEdit}
+                        onChange={updateEditField}
+                        onCancel={cancelEditing}
+                        onSave={() => void saveEdit(event.id)}
+                      />
+                    ) : null}
                   </div>
-                  <p className="max-w-2xl text-sm leading-6 text-stone-700">
-                    {event.description || "No description supplied."}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-black">Venue:</span> {event.venue}
-                    {event.venue_id ? <span className="ml-2 text-xs font-bold text-grass">(saved venue)</span> : null}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-black">Organiser:</span> {event.organiser}
-                    {event.organiser_id ? <span className="ml-2 text-xs font-bold text-grass">(saved organiser)</span> : null}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-black">Link/ticket info:</span> {event.link_or_ticket_info}
-                  </p>
-                  {event.image_url ? (
-                    <p className="break-all text-sm">
-                      <span className="font-black">Image URL:</span> {event.image_url}
-                    </p>
-                  ) : null}
-                  {event.submitter_name ? (
-                    <p className="text-sm">
-                      <span className="font-black">Submitter:</span> {event.submitter_name}
-                    </p>
-                  ) : null}
-                  {event.submitter_email ? (
-                    <p className="break-all text-sm">
-                      <span className="font-black">Submitter email:</span> {event.submitter_email}
-                    </p>
-                  ) : null}
-                  {event.admin_notes ? (
-                    <p className="text-sm">
-                      <span className="font-black">Admin notes:</span> {event.admin_notes}
-                    </p>
-                  ) : null}
-                  <p className="text-sm">
-                    <span className="font-black">Submitted:</span> {formatDateTime(event.created_at)}
-                  </p>
-                  {editingEventId === event.id && editForm ? (
-                    <EditPanel
-                      form={editForm}
-                      isSaving={isSavingEdit}
-                      onChange={updateEditField}
-                      onCancel={cancelEditing}
-                      onSave={() => void saveEdit(event.id)}
-                    />
-                  ) : null}
+                  <div className="grid w-full grid-cols-1 gap-3 min-[360px]:grid-cols-3 lg:w-48 lg:grid-cols-1">
+                    <button
+                      type="button"
+                      onClick={() => startEditing(event)}
+                      disabled={updatingEventId === event.id || editingEventId === event.id}
+                      className="min-h-11 rounded-full border-2 border-ink bg-posterYellow px-4 py-3 text-sm font-black text-ink disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleApprove(event.id)}
+                      disabled={updatingEventId === event.id || editingEventId === event.id}
+                      className="min-h-11 rounded-full border-2 border-ink bg-grass px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {updatingEventId === event.id ? "Working..." : "Approve"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleReject(event.id)}
+                      disabled={updatingEventId === event.id || editingEventId === event.id}
+                      className="min-h-11 rounded-full border-2 border-ink bg-corkRed px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {updatingEventId === event.id ? "Working..." : "Reject"}
+                    </button>
+                  </div>
                 </div>
-                <div className="grid w-full grid-cols-1 gap-3 min-[360px]:grid-cols-3 lg:w-48 lg:grid-cols-1">
-                  <button
-                    type="button"
-                    onClick={() => startEditing(event)}
-                    disabled={updatingEventId === event.id || editingEventId === event.id}
-                    className="min-h-11 rounded-full border-2 border-ink bg-posterYellow px-4 py-3 text-sm font-black text-ink disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleApprove(event.id)}
-                    disabled={updatingEventId === event.id || editingEventId === event.id}
-                    className="min-h-11 rounded-full border-2 border-ink bg-grass px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {updatingEventId === event.id ? "Working..." : "Approve"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleReject(event.id)}
-                    disabled={updatingEventId === event.id || editingEventId === event.id}
-                    className="min-h-11 rounded-full border-2 border-ink bg-corkRed px-4 py-3 text-sm font-black text-white disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {updatingEventId === event.id ? "Working..." : "Reject"}
-                  </button>
-                </div>
-              </div>
-            </article>
-          ))
+              </article>
+            );
+          })
         ) : null}
       </section>
     </PageShell>
@@ -449,6 +616,8 @@ type EditPanelProps = {
 };
 
 function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProps) {
+  const isManualVenue = form.venue_id === null;
+
   return (
     <div className="mt-5 rounded-2xl border-2 border-ink bg-paper p-3 min-[360px]:p-4">
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -463,7 +632,7 @@ function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProp
             required
             className="form-input bg-white"
             value={form.title}
-            onChange={(event) => onChange("title", event.target.value)}
+            onChange={(e) => onChange("title", e.target.value)}
           />
         </EditField>
         <EditField label="Date" required>
@@ -473,7 +642,7 @@ function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProp
             min={getTodayForInput()}
             className="form-input bg-white"
             value={form.event_date}
-            onChange={(event) => onChange("event_date", event.target.value)}
+            onChange={(e) => onChange("event_date", e.target.value)}
           />
         </EditField>
         <EditField label="Start time" required>
@@ -482,7 +651,7 @@ function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProp
             type="time"
             className="form-input bg-white"
             value={form.start_time}
-            onChange={(event) => onChange("start_time", event.target.value)}
+            onChange={(e) => onChange("start_time", e.target.value)}
           />
         </EditField>
         <EditField label="End time">
@@ -490,7 +659,7 @@ function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProp
             type="time"
             className="form-input bg-white"
             value={form.end_time}
-            onChange={(event) => onChange("end_time", event.target.value)}
+            onChange={(e) => onChange("end_time", e.target.value)}
           />
         </EditField>
         <VenueAutocomplete
@@ -500,9 +669,23 @@ function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProp
           onChange={(venueName, venueId) => {
             onChange("venue", venueName);
             onChange("venue_id", venueId);
+            // Clear manual maps URL when a saved venue is selected
+            if (venueId !== null) onChange("manual_maps_url", "");
           }}
           inputClassName="form-input bg-white"
         />
+        {/* Maps link — only when no saved venue */}
+        {isManualVenue && form.venue.trim() ? (
+          <EditField label="Maps link">
+            <input
+              type="url"
+              className="form-input bg-white"
+              value={form.manual_maps_url}
+              onChange={(e) => onChange("manual_maps_url", e.target.value)}
+              placeholder="https://maps.google.com/..."
+            />
+          </EditField>
+        ) : null}
         <OrganiserAutocomplete
           required
           value={form.organiser}
@@ -513,27 +696,18 @@ function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProp
           }}
           inputClassName="form-input bg-white"
         />
-        <EditField label="Discipline" required>
-          <select
-            required
-            className="form-input bg-white"
-            value={form.discipline}
-            onChange={(event) => onChange("discipline", event.target.value as Discipline)}
-          >
-            <option value="">Choose one</option>
-            {disciplines.map((discipline) => (
-              <option key={discipline} value={discipline}>
-                {discipline}
-              </option>
-            ))}
-          </select>
-        </EditField>
+        <DisciplineChipPicker
+          selectedDisciplines={form.disciplines}
+          onChange={(disciplines) => onChange("disciplines", disciplines)}
+          required
+          className="md:col-span-2"
+        />
         <EditField label="Link or ticket info" required>
           <input
             required
             className="form-input bg-white"
             value={form.link_or_ticket_info}
-            onChange={(event) => onChange("link_or_ticket_info", event.target.value)}
+            onChange={(e) => onChange("link_or_ticket_info", e.target.value)}
           />
         </EditField>
         <EditField label="Image URL">
@@ -541,14 +715,14 @@ function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProp
             type="url"
             className="form-input bg-white"
             value={form.image_url}
-            onChange={(event) => onChange("image_url", event.target.value)}
+            onChange={(e) => onChange("image_url", e.target.value)}
           />
         </EditField>
         <EditField label="Submitter name">
           <input
             className="form-input bg-white"
             value={form.submitter_name}
-            onChange={(event) => onChange("submitter_name", event.target.value)}
+            onChange={(e) => onChange("submitter_name", e.target.value)}
           />
         </EditField>
         <EditField label="Submitter email">
@@ -556,21 +730,21 @@ function EditPanel({ form, isSaving, onChange, onCancel, onSave }: EditPanelProp
             type="email"
             className="form-input bg-white"
             value={form.submitter_email}
-            onChange={(event) => onChange("submitter_email", event.target.value)}
+            onChange={(e) => onChange("submitter_email", e.target.value)}
           />
         </EditField>
         <EditField label="Short description" className="md:col-span-2">
           <textarea
             className="form-input min-h-28 resize-y bg-white"
             value={form.description}
-            onChange={(event) => onChange("description", event.target.value)}
+            onChange={(e) => onChange("description", e.target.value)}
           />
         </EditField>
         <EditField label="Admin notes" className="md:col-span-2">
           <textarea
             className="form-input min-h-24 resize-y bg-white"
             value={form.admin_notes}
-            onChange={(event) => onChange("admin_notes", event.target.value)}
+            onChange={(e) => onChange("admin_notes", e.target.value)}
           />
         </EditField>
       </div>

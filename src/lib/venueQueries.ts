@@ -6,6 +6,7 @@ type MapLinkOptions = {
   venueAddress?: string | null;
   googleMapsUrl?: string | null;
   appleMapsUrl?: string | null;
+  manualMapsUrl?: string | null;
 };
 
 export async function getVenues(): Promise<Venue[]> {
@@ -47,12 +48,34 @@ export function getVenueMapLinks({
   venueAddress,
   googleMapsUrl,
   appleMapsUrl,
+  manualMapsUrl,
 }: MapLinkOptions) {
+  // Saved venue maps take highest priority
+  if (googleMapsUrl?.trim() || appleMapsUrl?.trim()) {
+    const query = venueAddress?.trim() || `${venueName}, Cork, Ireland`;
+    const encodedQuery = encodeURIComponent(query);
+    return {
+      googleMapsUrl: googleMapsUrl?.trim() || `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`,
+      appleMapsUrl: appleMapsUrl?.trim() || `https://maps.apple.com/?q=${encodedQuery}`,
+      isManualOnly: false,
+    };
+  }
+
+  // Manual maps link from event submission
+  if (manualMapsUrl?.trim()) {
+    return {
+      googleMapsUrl: manualMapsUrl.trim(),
+      appleMapsUrl: null,
+      isManualOnly: true,
+    };
+  }
+
+  // Generated from venue name / address
   const query = venueAddress?.trim() || `${venueName}, Cork, Ireland`;
   const encodedQuery = encodeURIComponent(query);
-
   return {
-    googleMapsUrl: googleMapsUrl?.trim() || `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`,
-    appleMapsUrl: appleMapsUrl?.trim() || `https://maps.apple.com/?q=${encodedQuery}`,
+    googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`,
+    appleMapsUrl: `https://maps.apple.com/?q=${encodedQuery}`,
+    isManualOnly: false,
   };
 }

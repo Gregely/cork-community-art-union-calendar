@@ -1,6 +1,7 @@
 import { KeyboardEvent, MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import type { CalendarEvent } from "../../types/event";
+import { getEventDisciplines } from "../../types/event";
 import { getVenueMapLinks } from "../../lib/venueQueries";
 import { formatDate, formatTimeRange } from "../../utils/date";
 import { DisciplineBadge } from "./DisciplineBadge";
@@ -17,8 +18,10 @@ export function EventCard({ event, compact = false }: EventCardProps) {
     venueAddress: event.venue_record?.address,
     googleMapsUrl: event.venue_record?.google_maps_url,
     appleMapsUrl: event.venue_record?.apple_maps_url,
+    manualMapsUrl: event.manual_maps_url,
   });
   const detailPath = `/events/${event.id}`;
+  const eventDisciplines = getEventDisciplines(event);
 
   function openEventDetail() {
     navigate(detailPath);
@@ -46,7 +49,11 @@ export function EventCard({ event, compact = false }: EventCardProps) {
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-3">
-          <DisciplineBadge discipline={event.discipline} />
+          <div className="flex flex-wrap gap-1.5">
+            {eventDisciplines.map((d) => (
+              <DisciplineBadge key={d} discipline={d} />
+            ))}
+          </div>
           <div>
             <h3 className="font-display text-xl font-black leading-tight text-ink group-hover:underline group-focus:underline min-[360px]:text-2xl">
               {event.title}

@@ -3,6 +3,7 @@ import type { CalendarEvent } from "../types/event";
 const mockTimestamps = {
   venue_id: null,
   organiser_id: null,
+  manual_maps_url: null,
   submitter_name: null,
   submitter_email: null,
   admin_notes: null,
@@ -14,9 +15,12 @@ const mockTimestamps = {
   organiser_record: null,
 };
 
-function mockEvent(event: Omit<CalendarEvent, keyof typeof mockTimestamps>): CalendarEvent {
+function mockEvent(
+  event: Omit<CalendarEvent, keyof typeof mockTimestamps | "disciplines">,
+): CalendarEvent {
   return {
     ...event,
+    disciplines: event.discipline ? [event.discipline] : [],
     ...mockTimestamps,
   };
 }
