@@ -2,6 +2,7 @@ import type { CalendarEvent } from "../types/event";
 
 const mockTimestamps = {
   venue_id: null,
+  organiser_id: null,
   submitter_name: null,
   submitter_email: null,
   admin_notes: null,
@@ -10,6 +11,7 @@ const mockTimestamps = {
   approved_at: null,
   approved_by: null,
   venue_record: null,
+  organiser_record: null,
 };
 
 function mockEvent(event: Omit<CalendarEvent, keyof typeof mockTimestamps>): CalendarEvent {

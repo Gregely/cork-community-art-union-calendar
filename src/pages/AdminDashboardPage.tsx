@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DisciplineBadge } from "../components/events/DisciplineBadge";
 import { OrganiserAutocomplete } from "../components/forms/OrganiserAutocomplete";
 import { VenueAutocomplete } from "../components/forms/VenueAutocomplete";
@@ -322,6 +322,10 @@ export function AdminDashboardPage() {
         >
           Sign out
         </button>
+      </div>
+      <div className="mb-6 grid gap-2 min-[360px]:grid-cols-2">
+        <Link to="/admin" className="button-primary bg-ink text-paper">Pending submissions</Link>
+        <Link to="/admin/data" className="button-primary bg-white text-ink">Manage venues/organisers</Link>
       </div>
       {successMessage ? (
         <div className="mb-6 rounded-2xl border-2 border-ink bg-grass p-4 text-sm font-black text-white shadow-poster">

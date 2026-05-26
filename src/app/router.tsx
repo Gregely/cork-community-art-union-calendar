@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { AboutPage } from "../pages/AboutPage";
+import { AdminDataPage } from "../pages/AdminDataPage";
 import { AdminDashboardPage } from "../pages/AdminDashboardPage";
 import { AdminLoginPage } from "../pages/AdminLoginPage";
 import { EventDetailPage } from "../pages/EventDetailPage";
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: "about", element: <AboutPage /> },
       { path: "admin/login", element: <AdminLoginPage /> },
       { path: "admin", element: <AdminDashboardPage /> },
+      { path: "admin/data", element: <AdminDataPage /> },
       { path: "*", element: <NotFoundPage /> },
     ],
   },
