@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+    font-family: theme("fontFamily.body");
+    background:
+      linear-gradient(rgba(36, 32, 28, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(36, 32, 28, 0.035) 1px, transparent 1px),
+      theme("colors.paper");
+    background-size: 22px 22px;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+
+  p,
+  h1,
+  h2,
+  h3,
+  dd,
+  dt,
+  span,
+  a {
+    overflow-wrap: anywhere;
+  }
+}
+
+@layer components {
+  .button-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink px-5 py-3 text-center text-sm font-black shadow-poster transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-posterYellow sm:px-6;
+  }
+
+  .form-input {
+    @apply min-h-11 w-full rounded-xl border-2 border-ink bg-paper px-3 py-3 text-base font-bold outline-none transition-colors focus:bg-white focus:ring-4 focus:ring-posterYellow;
+  }
+}
