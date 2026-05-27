@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { DisciplineBadge } from "../components/events/DisciplineBadge";
 import { EventShareButton } from "../components/events/EventShareButton";
-import { PageShell } from "../components/layout/PageShell";
 import { EmptyState } from "../components/shared/EmptyState";
 import { ErrorState } from "../components/shared/ErrorState";
 import { LoadingState } from "../components/shared/LoadingState";
@@ -17,6 +16,7 @@ export function EventDetailPage() {
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+
   useEffect(() => {
     let isCurrent = true;
 
@@ -54,28 +54,28 @@ export function EventDetailPage() {
 
   if (isLoading) {
     return (
-      <PageShell title="Loading event">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         <LoadingState message="Loading this event..." />
-      </PageShell>
+      </main>
     );
   }
 
   if (errorMessage) {
     return (
-      <PageShell title="Event unavailable">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         <ErrorState message={errorMessage} />
-      </PageShell>
+      </main>
     );
   }
 
   if (!event) {
     return (
-      <PageShell title="Event not found">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         <EmptyState
           title="This event is not on the public board"
           message="It may still be pending review, or the link may be out of date."
         />
-      </PageShell>
+      </main>
     );
   }
 
@@ -90,34 +90,70 @@ export function EventDetailPage() {
   });
 
   return (
-    <PageShell eyebrow={eventDisciplines[0]} title={event.title}>
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+      {/* Back link */}
+      <div className="mb-6">
+        <Link
+          to="/events"
+          className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-cacao underline underline-offset-2 hover:text-corkRed"
+        >
+          ← All listings
+        </Link>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <article className="rounded-2xl border-2 border-ink bg-white p-4 shadow-poster sm:p-6">
-          <div className="flex flex-wrap gap-1.5">
+        {/* Poster card */}
+        <article className="border-2 border-ink bg-creamLight p-5 shadow-poster sm:p-8 lg:p-10">
+          {/* Discipline stamps */}
+          <div className="flex flex-wrap gap-3">
             {eventDisciplines.map((d) => (
               <DisciplineBadge key={d} discipline={d} />
             ))}
           </div>
-          <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-            <Detail label="Date" value={formatDate(event.event_date)} />
-            <Detail label="Time" value={formatTimeRange(event.start_time, event.end_time)} />
-            <Detail label="Venue" value={event.venue} />
-            <Detail label="Organiser" value={event.organiser} />
-          </dl>
-          {event.description ? <p className="mt-8 text-base leading-7 text-stone-700 sm:text-lg sm:leading-8">{event.description}</p> : null}
-          <div className="mt-8 rounded-2xl border-2 border-dashed border-ink bg-paper p-4">
-            <p className="text-sm font-black uppercase text-corkRed">Link or ticket info</p>
-            <p className="mt-2 font-bold">{event.link_or_ticket_info}</p>
+
+          {/* Title */}
+          <h1
+            className="mt-4 font-display font-black leading-[0.95] tracking-[-0.025em] text-ink"
+            style={{ fontSize: "clamp(36px, 5vw, 68px)" }}
+          >
+            {event.title}
+          </h1>
+
+          {/* Metaband */}
+          <div className="mt-6 grid grid-cols-2 gap-4 border-b-2 border-t-2 border-ink py-5 sm:grid-cols-4">
+            <Metablock label="Date" value={formatDate(event.event_date)} />
+            <Metablock label="Time" value={formatTimeRange(event.start_time, event.end_time)} />
+            <Metablock label="Venue" value={event.venue} />
+            <Metablock label="Organiser" value={event.organiser} />
           </div>
-          <div className="mt-4 rounded-2xl border-2 border-dashed border-ink bg-paper p-4">
-            <p className="text-sm font-black uppercase text-corkRed">Maps</p>
-            <div className="mt-3 flex flex-col gap-3 sm:flex-row">
+
+          {/* Description */}
+          {event.description ? (
+            <p className="mt-6 text-base leading-relaxed text-cacaoMid sm:text-lg sm:leading-8">
+              {event.description}
+            </p>
+          ) : null}
+
+          {/* Ticket / link info */}
+          <div className="mt-6 border-t border-dashed border-cacao pt-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-corkRed">
+              Tickets / link
+            </p>
+            <p className="mt-2 font-mono font-bold text-ink">{event.link_or_ticket_info}</p>
+          </div>
+
+          {/* Maps */}
+          <div className="mt-5">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-corkRed">
+              Maps
+            </p>
+            <div className="mt-3 flex flex-wrap gap-3">
               {mapLinks.isManualOnly ? (
                 <a
                   href={mapLinks.googleMapsUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink bg-white px-4 py-2 text-center text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
+                  className="button-primary"
                 >
                   Open in Maps
                 </a>
@@ -127,7 +163,7 @@ export function EventDetailPage() {
                     href={mapLinks.googleMapsUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink bg-white px-4 py-2 text-center text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
+                    className="button-primary"
                   >
                     {hasSavedMaps ? "Google Maps" : "Open in Google Maps"}
                   </a>
@@ -136,7 +172,7 @@ export function EventDetailPage() {
                       href={mapLinks.appleMapsUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink bg-white px-4 py-2 text-center text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
+                      className="button-primary"
                     >
                       {hasSavedMaps ? "Apple Maps" : "Open in Apple Maps"}
                     </a>
@@ -145,29 +181,51 @@ export function EventDetailPage() {
               )}
             </div>
           </div>
-          <div className="mt-4">
+
+          {/* Share */}
+          <div className="mt-5 border-t border-dashed border-cacao pt-5">
             <EventShareButton event={event} />
           </div>
+
+          {/* Poster foot */}
+          <div className="mt-8 flex justify-between border-t border-dashed border-cacao pt-4">
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cacao/80">
+              Cork Culture Board
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cacao/80">
+              By CCAU
+            </span>
+          </div>
         </article>
-        <aside className="h-fit rounded-2xl border-2 border-ink bg-posterYellow p-5 shadow-poster">
-          <h2 className="font-display text-2xl font-black">Got an event?</h2>
-          <p className="mt-3 text-sm leading-6">
+
+        {/* Sidebar */}
+        <aside
+          className="h-fit border-2 border-ink bg-posterYellow p-5 shadow-paste"
+          style={{ transform: "rotate(-0.8deg)" }}
+        >
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-corkRed">
+            Got an event?
+          </p>
+          <h2 className="mt-2 font-display text-2xl font-black text-ink">Pin it up</h2>
+          <p className="mt-3 text-sm leading-6 text-cacaoMid">
             Add it to the queue. Submissions stay pending until a moderator reviews them.
           </p>
-          <Link className="button-primary mt-5 bg-ink text-paper" to="/submit">
+          <Link className="button-primary mt-5 bg-ink text-creamLight" to="/submit">
             Submit an event
           </Link>
         </aside>
       </div>
-    </PageShell>
+    </main>
   );
 }
 
-function Detail({ label, value }: { label: string; value: string }) {
+function Metablock({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="text-xs font-black uppercase text-stone-500">{label}</dt>
-      <dd className="mt-1 font-bold">{value}</dd>
+      <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-corkRed">
+        {label}
+      </dt>
+      <dd className="mt-1 font-display text-lg font-black leading-tight text-ink">{value}</dd>
     </div>
   );
 }

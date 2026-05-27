@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -13,11 +13,32 @@
     margin: 0;
     overflow-x: hidden;
     font-family: theme("fontFamily.body");
-    background:
-      linear-gradient(rgba(36, 32, 28, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(36, 32, 28, 0.035) 1px, transparent 1px),
-      theme("colors.paper");
-    background-size: 22px 22px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    background-color: theme("colors.paper");
+    background-image:
+      radial-gradient(circle at 18% 20%, rgba(184, 66, 31, 0.07), transparent 35%),
+      radial-gradient(circle at 82% 70%, rgba(90, 107, 46, 0.06), transparent 40%),
+      linear-gradient(rgba(44, 24, 16, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(44, 24, 16, 0.04) 1px, transparent 1px);
+    background-size: auto, auto, 28px 28px, 28px 28px;
+  }
+
+  /* Paper grain overlay */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='4'/><feColorMatrix values='0 0 0 0 0.17  0 0 0 0 0.10  0 0 0 0 0.06  0 0 0 0.28 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    mix-blend-mode: multiply;
+    opacity: 0.45;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
   }
 
   a {
@@ -44,11 +65,17 @@
 }
 
 @layer components {
+  /* Stamp-style CTA button — square corners, mono font, offset shadow */
   .button-primary {
-    @apply inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink px-5 py-3 text-center text-sm font-black shadow-poster transition-transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-posterYellow sm:px-6;
+    @apply inline-flex min-h-11 items-center justify-center border-2 border-ink bg-creamLight px-5 py-3 text-center font-mono text-sm font-bold uppercase tracking-[0.1em] shadow-paste transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-poster focus:outline-none focus:ring-4 focus:ring-posterYellow active:translate-y-0.5 active:shadow-none sm:px-6;
   }
 
+  /* Form inputs — sharp corners, mono font, ochre focus shadow */
   .form-input {
-    @apply min-h-11 w-full rounded-xl border-2 border-ink bg-paper px-3 py-3 text-base font-bold outline-none transition-colors focus:bg-white focus:ring-4 focus:ring-posterYellow;
+    @apply min-h-11 w-full border-2 border-ink bg-creamLight px-3 py-3 font-mono text-base outline-none transition-[box-shadow];
+  }
+
+  .form-input:focus {
+    box-shadow: 3px 3px 0 theme("colors.posterYellow");
   }
 }

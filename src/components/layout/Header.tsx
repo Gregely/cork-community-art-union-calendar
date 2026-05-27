@@ -1,27 +1,40 @@
 import { NavLink } from "react-router-dom";
 
 const navItems = [
-  { to: "/events", label: "Events" },
+  { to: "/events", label: "Listings" },
   { to: "/submit", label: "Submit" },
   { to: "/about", label: "About" },
 ];
 
 export function Header() {
   return (
-    <header className="border-b-2 border-ink bg-paper">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-3 py-4 min-[360px]:px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <NavLink to="/" className="font-display text-xl font-black leading-none text-ink min-[360px]:text-2xl">
-          Cork Culture
-          <span className="block text-corkRed">Board</span>
+    <header className="sticky top-0 z-40 border-b-2 border-ink bg-cream">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-4">
+        <NavLink
+          to="/"
+          className="flex flex-col leading-none"
+          aria-label="Cork Culture Board home"
+        >
+          <span className="flex items-baseline gap-2">
+            <span className="font-display text-2xl font-black text-ink sm:text-3xl">CCAU</span>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-cacao sm:text-[11px]">
+              /kə-ˈkau/
+            </span>
+          </span>
+          <span className="mt-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cacao sm:text-[11px]">
+            Cork Culture Board
+          </span>
         </NavLink>
-        <nav className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center">
+        <nav className="flex flex-wrap gap-1.5">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `inline-flex min-h-11 items-center justify-center rounded-full border-2 border-ink px-3 py-2 text-center text-sm font-black focus:outline-none focus:ring-4 focus:ring-posterYellow sm:px-4 ${
-                  isActive ? "bg-ink text-paper" : "bg-white text-ink hover:bg-posterYellow"
+                `inline-flex min-h-10 items-center rounded-full border-2 border-ink px-3 py-2 font-mono text-xs font-bold uppercase tracking-[0.1em] transition-[background-color,transform] hover:-translate-y-px focus:outline-none focus:ring-4 focus:ring-posterYellow sm:px-4 ${
+                  isActive
+                    ? "bg-ink text-creamLight"
+                    : "bg-creamLight text-ink hover:bg-posterYellow"
                 }`
               }
             >

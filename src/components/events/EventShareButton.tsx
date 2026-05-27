@@ -152,6 +152,7 @@ export function EventShareButton({ event }: EventShareButtonProps) {
 
   return (
     <>
+      {/* Off-screen card for image capture */}
       {isOpen ? (
         <div
           style={{ position: "fixed", left: -9999, top: 0, width: CARD_SIZE, pointerEvents: "none" }}
@@ -162,35 +163,39 @@ export function EventShareButton({ event }: EventShareButtonProps) {
         </div>
       ) : null}
 
+      {/* Modal */}
       {isOpen ? (
         <div
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:items-center sm:p-6"
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:items-center sm:p-6"
+          style={{ background: "rgba(44, 24, 16, 0.6)", backdropFilter: "blur(2px)" }}
           onClick={handleBackdropClick}
         >
-          <div className="relative flex w-full max-w-[600px] flex-col gap-5 rounded-2xl border-2 border-ink bg-paper p-5 shadow-poster sm:p-6">
-            <div className="flex items-center justify-between gap-4">
+          <div className="relative flex w-full max-w-[600px] flex-col gap-5 border-2 border-ink bg-creamLight p-5 shadow-poster sm:p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between gap-4 border-b border-dashed border-cacao pb-4">
               <div>
-                <h2 className="font-display text-xl font-black">Share event</h2>
-                <p className="mt-0.5 text-xs font-bold text-stone-500">
-                  1080 × 1080 px — ready for Instagram
+                <h2 className="font-display text-2xl font-black text-ink">Share this event</h2>
+                <p className="mt-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-cacao">
+                  1080 × 1080 px · ready for Instagram
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="inline-flex min-h-10 items-center rounded-full border-2 border-ink bg-white px-4 py-2 text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
+                className="inline-flex min-h-10 items-center border-2 border-ink bg-creamLight px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.1em] shadow-paste transition-[transform,box-shadow] hover:-translate-y-px hover:bg-posterYellow hover:shadow-poster focus:outline-none focus:ring-4 focus:ring-posterYellow"
               >
                 Close
               </button>
             </div>
 
+            {/* Card preview */}
             <div ref={containerRef} style={{ width: "100%" }}>
               <div
                 style={{
                   width: "100%",
                   height: scale * CARD_SIZE,
                   overflow: "hidden",
-                  borderRadius: 8,
+                  border: "2px solid #2c1810",
                 }}
               >
                 <div
@@ -206,13 +211,14 @@ export function EventShareButton({ event }: EventShareButtonProps) {
               </div>
             </div>
 
+            {/* Action buttons */}
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={() => void handleShare()}
                   disabled={isGenerating}
-                  className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-ink bg-ink px-5 py-3 text-sm font-black text-paper hover:bg-stone-800 focus:outline-none focus:ring-4 focus:ring-posterYellow disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-11 flex-1 items-center justify-center border-2 border-ink bg-ink px-5 py-3 font-mono text-sm font-bold uppercase tracking-[0.1em] text-creamLight shadow-paste transition-[transform,box-shadow] hover:-translate-y-px hover:bg-cacaoMid hover:shadow-poster focus:outline-none focus:ring-4 focus:ring-posterYellow disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {shareCopied ? "Link copied!" : "Share card"}
                 </button>
@@ -220,31 +226,32 @@ export function EventShareButton({ event }: EventShareButtonProps) {
                   type="button"
                   onClick={() => void handleDownload()}
                   disabled={isGenerating}
-                  className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border-2 border-ink bg-white px-5 py-3 text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-11 flex-1 items-center justify-center border-2 border-ink bg-creamLight px-5 py-3 font-mono text-sm font-bold uppercase tracking-[0.1em] shadow-paste transition-[transform,box-shadow] hover:-translate-y-px hover:bg-posterYellow hover:shadow-poster focus:outline-none focus:ring-4 focus:ring-posterYellow disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Download Instagram card
+                  {isGenerating ? "Generating…" : "Download Instagram card"}
                 </button>
               </div>
               <button
                 type="button"
                 onClick={() => void handleCopyLink()}
-                className="inline-flex min-h-11 items-center justify-center rounded-full border-2 border-dashed border-ink bg-paper px-5 py-3 text-sm font-black hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
+                className="inline-flex min-h-11 items-center justify-center border-2 border-dashed border-cacao bg-creamLight px-5 py-3 font-mono text-sm font-bold uppercase tracking-[0.1em] transition-[background-color,transform] hover:-translate-y-px hover:bg-posterYellow focus:outline-none focus:ring-4 focus:ring-posterYellow"
               >
                 {linkCopied ? "Copied!" : "Copy event link"}
               </button>
             </div>
 
-            <p className="text-xs font-bold text-stone-500">
-              Choose Instagram from your phone's share menu, or download the card and upload it to your story.
+            <p className="font-mono text-xs text-cacao">
+              Choose Instagram from your phone's share menu, or download the card and upload it to
+              your story.
             </p>
 
             {generateError ? (
-              <p className="rounded-xl border-2 border-corkRed bg-red-50 px-4 py-3 text-sm font-bold text-corkRed">
+              <p className="border-2 border-corkRed bg-creamLight px-4 py-3 font-mono text-sm font-bold text-corkRed">
                 {generateError}
               </p>
             ) : null}
             {shareError ? (
-              <p className="rounded-xl border-2 border-corkRed bg-red-50 px-4 py-3 text-sm font-bold text-corkRed">
+              <p className="border-2 border-corkRed bg-creamLight px-4 py-3 font-mono text-sm font-bold text-corkRed">
                 {shareError}
               </p>
             ) : null}
@@ -255,7 +262,7 @@ export function EventShareButton({ event }: EventShareButtonProps) {
       <button
         type="button"
         onClick={handleOpen}
-        className="inline-flex min-h-11 items-center rounded-full border-2 border-ink bg-posterYellow px-5 py-2 text-sm font-black hover:bg-yellow-400 focus:outline-none focus:ring-4 focus:ring-posterYellow"
+        className="button-primary bg-corkRed text-creamLight"
       >
         Share event
       </button>

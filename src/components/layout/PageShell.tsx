@@ -9,15 +9,26 @@ type PageShellProps = {
 
 export function PageShell({ eyebrow, title, intro, children }: PageShellProps) {
   return (
-    <main className="mx-auto max-w-6xl px-3 py-7 min-[360px]:px-4 sm:px-6 sm:py-12">
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
       <div className="mb-8 max-w-3xl">
         {eyebrow ? (
-          <p className="mb-3 w-fit max-w-full rounded-full border-2 border-ink bg-posterYellow px-3 py-1 text-xs font-black uppercase">
+          <p
+            className="mb-3 inline-flex items-center border-2 px-2 py-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em]"
+            style={{
+              color: "#b8421f",
+              borderColor: "#b8421f",
+              boxShadow: "0 0 0 2px #f1e4c8, 0 0 0 3.5px #b8421f",
+            }}
+          >
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="font-display text-3xl font-black leading-none min-[360px]:text-4xl sm:text-6xl">{title}</h1>
-        {intro ? <p className="mt-4 text-base leading-7 text-stone-700 sm:text-lg sm:leading-8">{intro}</p> : null}
+        <h1 className="font-display text-4xl font-black leading-none text-ink min-[360px]:text-5xl sm:text-6xl">
+          {title}
+        </h1>
+        {intro ? (
+          <p className="mt-4 text-base leading-7 text-cacaoMid sm:text-lg sm:leading-8">{intro}</p>
+        ) : null}
       </div>
       {children}
     </main>
