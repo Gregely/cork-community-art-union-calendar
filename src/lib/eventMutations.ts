@@ -16,6 +16,7 @@ export async function submitEvent(input: EventInsert): Promise<void> {
     discipline: disciplines[0] ?? input.discipline,
     disciplines,
     description: input.description ?? null,
+    entry_fee: input.entry_fee ?? null,
     link_or_ticket_info: input.link_or_ticket_info,
     image_url: input.image_url ?? null,
     manual_maps_url: input.manual_maps_url ?? null,

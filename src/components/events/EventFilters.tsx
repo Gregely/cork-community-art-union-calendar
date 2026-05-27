@@ -5,17 +5,18 @@ import { disciplines } from "../../types/event";
 
 export type DatePreset = "upcoming" | "today" | "this-week" | "this-month" | "custom";
 
+// Matches DisciplineBadge ink palette — one distinct earthy hue per discipline.
 const disciplineActiveColors: Record<string, string> = {
-  Exhibition: "bg-pinkPunch text-white border-pinkPunch",
-  Music: "bg-leeBlue text-white border-leeBlue",
-  Theatre: "bg-corkRed text-white border-corkRed",
-  Film: "bg-ink text-paper border-ink",
-  Dance: "bg-grass text-white border-grass",
-  Poetry: "bg-purple-600 text-white border-purple-600",
-  Workshop: "bg-posterYellow text-ink border-posterYellow",
-  Talk: "bg-orange-500 text-white border-orange-500",
-  Community: "bg-teal-500 text-white border-teal-500",
-  Multidisciplinary: "bg-lime-400 text-ink border-lime-400",
+  Exhibition:        "bg-[#c0513a] text-creamLight border-[#c0513a]",
+  Music:             "bg-[#4a6b28] text-creamLight border-[#4a6b28]",
+  Theatre:           "bg-corkRed   text-creamLight border-corkRed",
+  Film:              "bg-[#243040] text-creamLight border-[#243040]",
+  Dance:             "bg-[#8b4020] text-creamLight border-[#8b4020]",
+  Poetry:            "bg-[#6b3a7a] text-creamLight border-[#6b3a7a]",
+  Workshop:          "bg-[#b87a12] text-ink        border-[#b87a12]",
+  Talk:              "bg-[#8b3218] text-creamLight border-[#8b3218]",
+  Community:         "bg-[#2a6838] text-creamLight border-[#2a6838]",
+  Multidisciplinary: "bg-[#4a4c20] text-creamLight border-[#4a4c20]",
 };
 
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
@@ -91,23 +92,23 @@ export function EventFilters({
   ].filter(Boolean);
 
   return (
-    <div className="space-y-5 rounded-2xl border-2 border-ink bg-posterYellow p-4 shadow-poster sm:p-5">
+    <div className="space-y-5 border-2 border-ink bg-posterYellow p-4 shadow-poster sm:p-5">
       {/* Search */}
-      <label className="block space-y-2 text-sm font-black">
-        Search
+      <label className="block space-y-2">
+        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink">Search</span>
         <input
           type="search"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Title, venue, organiser..."
-          className="min-h-11 w-full rounded-xl border-2 border-ink bg-white px-3 py-3 font-bold focus:outline-none focus:ring-4 focus:ring-white"
+          className="form-input w-full"
         />
       </label>
 
       {/* Discipline chips */}
       <div>
         <div className="mb-2 flex items-center justify-between gap-2">
-          <p className="text-sm font-black">Discipline</p>
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink">Discipline</p>
           {selectedDisciplines.length > 0 ? (
             <button
               type="button"
@@ -153,7 +154,7 @@ export function EventFilters({
 
       {/* Date preset chips */}
       <div>
-        <p className="mb-2 text-sm font-black">When</p>
+        <p className="mb-2 font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink">When</p>
         <div className="flex flex-wrap gap-2">
           {DATE_PRESETS.map(({ value, label }) => (
             <FilterChip
@@ -173,7 +174,7 @@ export function EventFilters({
                 type="date"
                 value={customFrom}
                 onChange={(e) => onCustomFromChange(e.target.value)}
-                className="min-h-11 w-full rounded-xl border-2 border-ink bg-white px-3 py-3 font-bold focus:outline-none focus:ring-4 focus:ring-white"
+                className="form-input w-full"
               />
             </label>
             <label className="space-y-2 text-sm font-black">
@@ -182,7 +183,7 @@ export function EventFilters({
                 type="date"
                 value={customTo}
                 onChange={(e) => onCustomToChange(e.target.value)}
-                className="min-h-11 w-full rounded-xl border-2 border-ink bg-white px-3 py-3 font-bold focus:outline-none focus:ring-4 focus:ring-white"
+                className="form-input w-full"
               />
             </label>
           </div>
@@ -190,14 +191,14 @@ export function EventFilters({
       </div>
 
       {/* Include past */}
-      <label className="flex cursor-pointer items-center gap-3 text-sm font-black">
+      <label className="flex cursor-pointer items-center gap-3">
         <input
           type="checkbox"
           checked={includePast}
           onChange={(e) => onIncludePastChange(e.target.checked)}
           className="h-5 w-5 accent-ink"
         />
-        Include past events
+        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-ink">Include past events</span>
       </label>
 
       {/* Active filter summary + clear all */}
@@ -209,7 +210,7 @@ export function EventFilters({
           <button
             type="button"
             onClick={onClearAll}
-            className="inline-flex min-h-9 items-center rounded-full border-2 border-ink bg-ink px-4 py-2 text-xs font-black text-paper hover:bg-stone-800 focus:outline-none focus:ring-4 focus:ring-white"
+            className="inline-flex min-h-9 items-center border-2 border-ink bg-ink px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.1em] text-paper shadow-paste transition-[transform,box-shadow] hover:-translate-y-px hover:shadow-poster focus:outline-none focus:ring-4 focus:ring-posterYellow"
           >
             Clear all
           </button>

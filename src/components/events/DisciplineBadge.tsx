@@ -1,15 +1,17 @@
-// Stamp-style discipline tags. Double-border effect uses box-shadow + border with matching ink color.
+// Stamp-style discipline tags. Each discipline has its own muted risograph ink.
+// Double-border: border-2 (inner ring) + box-shadow gap (creamLight) + outer ring.
+// Background is a ~12 % alpha tint of the ink for a barely-there colour ghost.
 const stampInk: Record<string, string> = {
-  Exhibition: "#c98979",    // dusty pink
-  Music: "#5a6b2e",         // olive
-  Theatre: "#b8421f",       // burnt red
-  Film: "#2c1810",          // cacao deep
-  Dance: "#6b3d2a",         // cacao
-  Poetry: "#4d2b1d",        // cacao mid
-  Workshop: "#c89432",      // ochre
-  Talk: "#b8421f",          // burnt red
-  Community: "#5a6b2e",     // olive
-  Multidisciplinary: "#6b3d2a", // legacy
+  Exhibition:        "#c0513a",   // warm coral
+  Music:             "#4a6b28",   // deep olive
+  Theatre:           "#b8421f",   // burnt red
+  Film:              "#243040",   // dark slate / darkroom
+  Dance:             "#8b4020",   // rust / terracotta
+  Poetry:            "#6b3a7a",   // muted plum
+  Workshop:          "#b87a12",   // amber-ochre
+  Talk:              "#8b3218",   // deep rust (distinct from Theatre)
+  Community:         "#2a6838",   // forest green (distinct from Music)
+  Multidisciplinary: "#4a4c20",   // olive-charcoal
 };
 
 type DisciplineBadgeProps = {
@@ -24,6 +26,7 @@ export function DisciplineBadge({ discipline }: DisciplineBadgeProps) {
       style={{
         color: ink,
         borderColor: ink,
+        backgroundColor: ink + "1e",          // ~12 % alpha tint
         boxShadow: `0 0 0 2px #fef7e6, 0 0 0 3.5px ${ink}`,
       }}
     >

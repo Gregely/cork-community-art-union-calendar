@@ -13,7 +13,7 @@ export function PageShell({ eyebrow, title, intro, children }: PageShellProps) {
       <div className="mb-8 max-w-3xl">
         {eyebrow ? (
           <p
-            className="mb-3 inline-flex items-center border-2 px-2 py-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.12em]"
+            className="mb-3 inline-flex items-center border-2 px-2 py-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.08em]"
             style={{
               color: "#b8421f",
               borderColor: "#b8421f",
@@ -27,7 +27,7 @@ export function PageShell({ eyebrow, title, intro, children }: PageShellProps) {
           {title}
         </h1>
         {intro ? (
-          <p className="mt-4 text-base leading-7 text-cacaoMid sm:text-lg sm:leading-8">{intro}</p>
+          <p className="mt-4 text-base leading-relaxed text-cacaoMid sm:text-lg">{intro}</p>
         ) : null}
       </div>
       {children}

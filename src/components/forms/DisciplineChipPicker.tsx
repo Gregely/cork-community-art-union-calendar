@@ -1,15 +1,16 @@
 import { disciplines } from "../../types/event";
 
+// Active colours mirror the DisciplineBadge ink palette exactly.
 const activeColors: Record<string, string> = {
-  Exhibition: "bg-pinkPunch text-ink border-pinkPunch",
-  Music: "bg-grass text-creamLight border-grass",
-  Theatre: "bg-corkRed text-creamLight border-corkRed",
-  Film: "bg-ink text-creamLight border-ink",
-  Dance: "bg-cacao text-creamLight border-cacao",
-  Poetry: "bg-cacaoMid text-creamLight border-cacaoMid",
-  Workshop: "bg-posterYellow text-ink border-posterYellow",
-  Talk: "bg-corkRed text-creamLight border-corkRed",
-  Community: "bg-grass text-creamLight border-grass",
+  Exhibition: "bg-[#c0513a] text-creamLight border-[#c0513a]",
+  Music:      "bg-[#4a6b28] text-creamLight border-[#4a6b28]",
+  Theatre:    "bg-corkRed   text-creamLight border-corkRed",
+  Film:       "bg-[#243040] text-creamLight border-[#243040]",
+  Dance:      "bg-[#8b4020] text-creamLight border-[#8b4020]",
+  Poetry:     "bg-[#6b3a7a] text-creamLight border-[#6b3a7a]",
+  Workshop:   "bg-[#b87a12] text-ink        border-[#b87a12]",
+  Talk:       "bg-[#8b3218] text-creamLight border-[#8b3218]",
+  Community:  "bg-[#2a6838] text-creamLight border-[#2a6838]",
 };
 
 type DisciplineChipPickerProps = {

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { EventCard } from "../components/events/EventCard";
 import type { DatePreset } from "../components/events/EventFilters";
 import { EventFilters } from "../components/events/EventFilters";
-import { EventList } from "../components/events/EventList";
 import { PageShell } from "../components/layout/PageShell";
+import { EmptyState } from "../components/shared/EmptyState";
 import { ErrorState } from "../components/shared/ErrorState";
 import { LoadingState } from "../components/shared/LoadingState";
 import { getAllApprovedEvents } from "../lib/eventQueries";
@@ -11,6 +12,12 @@ import { getOrganisers } from "../lib/organiserQueries";
 import { getVenues } from "../lib/venueQueries";
 import type { Event, Organiser, Venue } from "../types/event";
 import { getEventDisciplines } from "../types/event";
+
+const MONTHS_LONG = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
+];
+const DAYS_LONG = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 
 function formatLocalDate(date: Date): string {
   const year = date.getFullYear();
@@ -39,6 +46,34 @@ function getEndOfMonth(): string {
 
 function parseMulti(value: string | null): string[] {
   return (value ?? "").split(",").filter(Boolean);
+}
+
+function DateDivider({ date }: { date: string }) {
+  const [year, mon, day] = date.split("-").map(Number);
+  const dateObj = new Date(year, mon - 1, day);
+  const dow = DAYS_LONG[dateObj.getDay()];
+  const monthName = MONTHS_LONG[mon - 1];
+  const today = getTodayLocalDate();
+  const isToday = date === today;
+
+  return (
+    <div className="flex items-center gap-4 pb-1">
+      {/* Left accent bar + date text */}
+      <div
+        className="flex-shrink-0 pl-3"
+        style={{ borderLeft: "3px solid #b8421f" }}
+      >
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-corkRed">
+          {isToday ? "Today · " : ""}{dow}
+        </p>
+        <p className="font-display text-2xl font-black leading-tight text-ink">
+          {day} {monthName}{" "}
+          <span className="font-mono text-lg font-bold text-cacao">{year}</span>
+        </p>
+      </div>
+      <div className="h-px flex-1 border-b border-dashed border-cacao/40" />
+    </div>
+  );
 }
 
 export function EventsPage() {
@@ -110,7 +145,6 @@ export function EventsPage() {
     return allEvents.filter((event) => {
       if (event.status !== "approved") return false;
 
-      // Date range
       if (datePreset === "custom") {
         if (customFrom && event.event_date < customFrom) return false;
         if (customTo && event.event_date > customTo) return false;
@@ -121,13 +155,11 @@ export function EventsPage() {
         if (datePreset === "this-month" && event.event_date > endOfMonth) return false;
       }
 
-      // Disciplines — OR within selection, checked against the disciplines array with legacy fallback
       if (selectedDisciplines.length > 0) {
         const eventDisciplines = getEventDisciplines(event);
         if (!eventDisciplines.some((d) => selectedDisciplines.includes(d))) return false;
       }
 
-      // Venues — OR within selection, match by FK or by name
       if (selectedVenueIds.length > 0) {
         const matchesAnyVenue = selectedVenueIds.some((vid) => {
           if (event.venue_id === vid) return true;
@@ -137,7 +169,6 @@ export function EventsPage() {
         if (!matchesAnyVenue) return false;
       }
 
-      // Organisers — OR within selection, match by FK or by name
       if (selectedOrganiserIds.length > 0) {
         const matchesAnyOrganiser = selectedOrganiserIds.some((oid) => {
           if (event.organiser_id === oid) return true;
@@ -147,7 +178,6 @@ export function EventsPage() {
         if (!matchesAnyOrganiser) return false;
       }
 
-      // Full-text search
       if (search.trim()) {
         const q = search.toLowerCase().trim();
         const hit =
@@ -173,6 +203,19 @@ export function EventsPage() {
     venueMap,
     organiserMap,
   ]);
+
+  const eventsByDate = useMemo(() => {
+    const groups: { date: string; events: Event[] }[] = [];
+    for (const event of filteredEvents) {
+      const last = groups[groups.length - 1];
+      if (!last || last.date !== event.event_date) {
+        groups.push({ date: event.event_date, events: [event] });
+      } else {
+        last.events.push(event);
+      }
+    }
+    return groups;
+  }, [filteredEvents]);
 
   function updateFilter(key: string, value: string) {
     setSearchParams(
@@ -208,45 +251,69 @@ export function EventsPage() {
     setSearchParams({}, { replace: true });
   }
 
+  const filters = (
+    <EventFilters
+      selectedDisciplines={selectedDisciplines}
+      selectedVenueIds={selectedVenueIds}
+      selectedOrganiserIds={selectedOrganiserIds}
+      search={search}
+      datePreset={datePreset}
+      customFrom={customFrom}
+      customTo={customTo}
+      includePast={includePast}
+      venues={venues}
+      organisers={organisers}
+      onDisciplinesChange={(vals) => updateMultiFilter("disciplines", vals)}
+      onVenueIdsChange={(vals) => updateMultiFilter("venue_ids", vals)}
+      onOrganiserIdsChange={(vals) => updateMultiFilter("organiser_ids", vals)}
+      onSearchChange={(val) => updateFilter("search", val)}
+      onDatePresetChange={(val) =>
+        updateFilter("date", val === "upcoming" ? "" : val)
+      }
+      onCustomFromChange={(val) => updateFilter("from", val)}
+      onCustomToChange={(val) => updateFilter("to", val)}
+      onIncludePastChange={(val) => updateFilter("past", val ? "1" : "")}
+      onClearAll={clearAllFilters}
+    />
+  );
+
   return (
     <PageShell
       eyebrow="Events"
       title="What's on in Cork"
       intro="Cork city arts and culture — exhibitions, gigs, workshops, screenings, readings, talks, and more."
     >
-      <div className="space-y-8">
-        <EventFilters
-          selectedDisciplines={selectedDisciplines}
-          selectedVenueIds={selectedVenueIds}
-          selectedOrganiserIds={selectedOrganiserIds}
-          search={search}
-          datePreset={datePreset}
-          customFrom={customFrom}
-          customTo={customTo}
-          includePast={includePast}
-          venues={venues}
-          organisers={organisers}
-          onDisciplinesChange={(vals) => updateMultiFilter("disciplines", vals)}
-          onVenueIdsChange={(vals) => updateMultiFilter("venue_ids", vals)}
-          onOrganiserIdsChange={(vals) => updateMultiFilter("organiser_ids", vals)}
-          onSearchChange={(val) => updateFilter("search", val)}
-          onDatePresetChange={(val) =>
-            updateFilter("date", val === "upcoming" ? "" : val)
-          }
-          onCustomFromChange={(val) => updateFilter("from", val)}
-          onCustomToChange={(val) => updateFilter("to", val)}
-          onIncludePastChange={(val) => updateFilter("past", val ? "1" : "")}
-          onClearAll={clearAllFilters}
-        />
-        {isLoading ? <LoadingState /> : null}
-        {!isLoading && errorMessage ? <ErrorState message={errorMessage} /> : null}
-        {!isLoading && !errorMessage ? (
-          <EventList
-            events={filteredEvents}
-            emptyTitle="No events match those filters"
-            emptyMessage="Try adjusting the discipline, venue, date, or search term — or clear all filters to see everything."
-          />
-        ) : null}
+      <div className="grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start">
+        {/* Main: grouped event listing */}
+        <div className="order-2 lg:order-1">
+          {isLoading ? <LoadingState /> : null}
+          {!isLoading && errorMessage ? <ErrorState message={errorMessage} /> : null}
+          {!isLoading && !errorMessage && filteredEvents.length === 0 ? (
+            <EmptyState
+              title="No events match those filters"
+              message="Try adjusting the discipline, venue, date, or search term — or clear all filters to see everything."
+            />
+          ) : null}
+          {!isLoading && !errorMessage && eventsByDate.length > 0 ? (
+            <div className="space-y-10">
+              {eventsByDate.map(({ date, events }) => (
+                <section key={date}>
+                  <DateDivider date={date} />
+                  <div className="mt-4 space-y-4">
+                    {events.map((event) => (
+                      <EventCard key={event.id} event={event} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        {/* Sidebar: filters */}
+        <aside className="order-1 lg:order-2 lg:sticky lg:top-20">
+          {filters}
+        </aside>
       </div>
     </PageShell>
   );

@@ -25,12 +25,12 @@ export function Footer() {
           <p className="font-display text-xl font-black text-posterYellow">
             Cork Community Arts Union
           </p>
-          <p className="mt-3 text-sm leading-relaxed opacity-80">
+          <p className="mt-3 font-mono text-xs leading-relaxed tracking-[0.04em] opacity-75">
             A shared listings board, run by volunteers. No ads, no algorithm — just what's on.
           </p>
         </div>
         <div>
-          <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-posterYellow">
+          <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-posterYellow">
             On the board
           </p>
           <div className="flex flex-col gap-2">
@@ -46,7 +46,7 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-posterYellow">
+          <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-posterYellow">
             Running the board
           </p>
           <div className="flex flex-col gap-2">

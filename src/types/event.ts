@@ -1,4 +1,4 @@
-export type EventStatus = "pending" | "approved" | "rejected";
+export type EventStatus = "pending" | "approved" | "rejected" | "unpublished";
 
 export type Discipline =
   | "Exhibition"
@@ -24,6 +24,7 @@ export type Event = {
   discipline: string;
   disciplines: string[];
   description: string | null;
+  entry_fee: string | null;
   link_or_ticket_info: string;
   image_url: string | null;
   manual_maps_url: string | null;
@@ -52,6 +53,7 @@ export type EventInsert = {
   discipline: string;
   disciplines?: string[];
   description?: string | null;
+  entry_fee?: string | null;
   link_or_ticket_info: string;
   image_url?: string | null;
   manual_maps_url?: string | null;

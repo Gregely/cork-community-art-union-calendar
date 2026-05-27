@@ -67,11 +67,11 @@ export function EventCard({ event, compact = false }: EventCardProps) {
             boxShadow: `0 0 0 3px #fef7e6, 0 0 0 4.5px ${CACAO}`,
           }}
         >
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em]">{DOW}</span>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-corkRed">{DOW}</span>
           <span className="font-display font-black leading-none text-ink" style={{ fontSize: 36 }}>
             {DAY}
           </span>
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em]">{MON}</span>
+          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.12em]">{MON}</span>
         </div>
 
         {/* Body */}
@@ -88,29 +88,40 @@ export function EventCard({ event, compact = false }: EventCardProps) {
 
           <div className="mt-2.5 space-y-1.5 font-mono text-[13px] text-cacaoMid">
             <div className="flex min-w-0 gap-2">
-              <span className="w-10 flex-shrink-0 pt-px font-bold text-[10px] uppercase tracking-[0.15em] text-cacao">
+              <span className="w-10 flex-shrink-0 pt-px font-bold text-[10px] uppercase tracking-[0.1em] text-cacao">
                 When
               </span>
               <span>{formatTimeRange(event.start_time, event.end_time)}</span>
             </div>
             <div className="flex min-w-0 gap-2">
-              <span className="w-10 flex-shrink-0 pt-px font-bold text-[10px] uppercase tracking-[0.15em] text-cacao">
+              <span className="w-10 flex-shrink-0 pt-px font-bold text-[10px] uppercase tracking-[0.1em] text-cacao">
                 Where
               </span>
               <span className="min-w-0 truncate">{event.venue}</span>
             </div>
             {!compact ? (
               <div className="flex min-w-0 gap-2">
-                <span className="w-10 flex-shrink-0 pt-px font-bold text-[10px] uppercase tracking-[0.15em] text-cacao">
+                <span className="w-10 flex-shrink-0 pt-px font-bold text-[10px] uppercase tracking-[0.1em] text-cacao">
                   Who
                 </span>
                 <span className="min-w-0 truncate">{event.organiser}</span>
               </div>
             ) : null}
+            {event.entry_fee ? (
+              <div className="flex min-w-0 gap-2">
+                <span
+                  className="w-10 flex-shrink-0 pt-px font-mono font-bold text-[10px] uppercase tracking-[0.1em]"
+                  style={{ color: "#4a6b28" }}
+                >
+                  Fee
+                </span>
+                <span className="min-w-0 truncate">{event.entry_fee}</span>
+              </div>
+            ) : null}
           </div>
 
           {!compact && event.description ? (
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-cacaoMid">{event.description}</p>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-cacaoMid">{event.description}</p>
           ) : null}
 
           <div className="mt-4 flex items-baseline justify-between border-t border-dashed border-cacao pt-3">

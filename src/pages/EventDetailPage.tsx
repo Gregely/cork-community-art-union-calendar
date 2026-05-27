@@ -134,17 +134,29 @@ export function EventDetailPage() {
             </p>
           ) : null}
 
-          {/* Ticket / link info */}
+          {/* Entry fee */}
           <div className="mt-6 border-t border-dashed border-cacao pt-5">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-corkRed">
-              Tickets / link
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-corkRed">
+              Entry
             </p>
-            <p className="mt-2 font-mono font-bold text-ink">{event.link_or_ticket_info}</p>
+            <p className="mt-2 font-mono font-bold text-ink">
+              {event.entry_fee ?? "Entry details not listed"}
+            </p>
           </div>
+
+          {/* Links & booking */}
+          {event.link_or_ticket_info ? (
+            <div className="mt-5 border-t border-dashed border-cacao pt-5">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-corkRed">
+                Links &amp; booking
+              </p>
+              <p className="mt-2 font-mono font-bold text-ink">{event.link_or_ticket_info}</p>
+            </div>
+          ) : null}
 
           {/* Maps */}
           <div className="mt-5">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-corkRed">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-corkRed">
               Maps
             </p>
             <div className="mt-3 flex flex-wrap gap-3">
@@ -203,11 +215,11 @@ export function EventDetailPage() {
           className="h-fit border-2 border-ink bg-posterYellow p-5 shadow-paste"
           style={{ transform: "rotate(-0.8deg)" }}
         >
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-corkRed">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-corkRed">
             Got an event?
           </p>
           <h2 className="mt-2 font-display text-2xl font-black text-ink">Pin it up</h2>
-          <p className="mt-3 text-sm leading-6 text-cacaoMid">
+          <p className="mt-3 text-sm leading-relaxed text-cacaoMid">
             Add it to the queue. Submissions stay pending until a moderator reviews them.
           </p>
           <Link className="button-primary mt-5 bg-ink text-creamLight" to="/submit">
@@ -222,7 +234,7 @@ export function EventDetailPage() {
 function Metablock({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-corkRed">
+      <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-corkRed">
         {label}
       </dt>
       <dd className="mt-1 font-display text-lg font-black leading-tight text-ink">{value}</dd>

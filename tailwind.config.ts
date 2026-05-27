@@ -20,8 +20,8 @@ export default {
       },
       fontFamily: {
         display: ["Fraunces", "Georgia", "serif"],
-        body: ["Inter", "Helvetica Neue", "system-ui", "sans-serif"],
-        mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
+        body: ["Lora", "Georgia", "serif"],
+        mono: ['"Space Mono"', "ui-monospace", "monospace"],
       },
       boxShadow: {
         poster: "5px 6px 0 #2c1810",

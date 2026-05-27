@@ -4,8 +4,8 @@ type LoadingStateProps = {
 
 export function LoadingState({ message = "Loading events..." }: LoadingStateProps) {
   return (
-    <div className="rounded-2xl border-2 border-dashed border-ink bg-white p-8 text-center">
-      <p className="font-display text-2xl font-black">{message}</p>
+    <div className="border-2 border-dashed border-cacao bg-creamLight p-8 text-center">
+      <p className="font-mono text-sm uppercase tracking-[0.15em] text-cacao">{message}</p>
     </div>
   );
 }

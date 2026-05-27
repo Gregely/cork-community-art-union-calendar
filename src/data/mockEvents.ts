@@ -4,6 +4,7 @@ const mockTimestamps = {
   venue_id: null,
   organiser_id: null,
   manual_maps_url: null,
+  entry_fee: null,
   submitter_name: null,
   submitter_email: null,
   admin_notes: null,

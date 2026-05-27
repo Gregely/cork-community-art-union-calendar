@@ -16,6 +16,7 @@ type SubmissionFormState = {
   organiser_id: string | null;
   organiser: string;
   disciplines: string[];
+  entry_fee: string;
   link_or_ticket_info: string;
   image_url: string;
   submitter_name: string;
@@ -34,6 +35,7 @@ const initialFormState: SubmissionFormState = {
   organiser_id: null,
   organiser: "",
   disciplines: [],
+  entry_fee: "",
   link_or_ticket_info: "",
   image_url: "",
   submitter_name: "",
@@ -85,7 +87,7 @@ export function EventSubmissionForm() {
     if (!formState.venue.trim()) return "Venue is required.";
     if (!formState.organiser.trim()) return "Organiser is required.";
     if (formState.disciplines.length === 0) return "At least one discipline is required.";
-    if (!formState.link_or_ticket_info.trim()) return "Link or ticket info is required.";
+    if (!formState.entry_fee.trim()) return "Entry fee is required.";
 
     if (formState.event_date < getTodayLocalDate()) {
       return "Event date cannot be in the past.";
@@ -133,6 +135,7 @@ export function EventSubmissionForm() {
       discipline: formState.disciplines[0] ?? "",
       disciplines: formState.disciplines,
       manual_maps_url: formState.venue_id ? null : (formState.manual_maps_url.trim() || null),
+      entry_fee: formState.entry_fee.trim(),
       link_or_ticket_info: formState.link_or_ticket_info.trim(),
       image_url: formState.image_url.trim() || null,
       submitter_name: formState.submitter_name.trim() || null,
@@ -165,14 +168,14 @@ export function EventSubmissionForm() {
   const isManualVenue = formState.venue_id === null;
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl border-2 border-ink bg-white p-5 shadow-poster sm:p-6">
+    <form onSubmit={handleSubmit} className="border-2 border-ink bg-creamLight p-5 shadow-poster sm:p-6">
       {successMessage ? (
-        <div className="mb-5 rounded-2xl border-2 border-ink bg-grass p-4 text-sm font-bold text-white">
+        <div className="mb-5 border-2 border-grass bg-creamLight p-4 font-mono text-sm font-bold text-grass">
           {successMessage}
         </div>
       ) : null}
       {errorMessage ? (
-        <div className="mb-5 rounded-2xl border-2 border-ink bg-corkRed p-4 text-sm font-bold text-white">
+        <div className="mb-5 border-2 border-corkRed bg-creamLight p-4 font-mono text-sm font-bold text-corkRed">
           {errorMessage}
         </div>
       ) : null}
@@ -234,7 +237,7 @@ export function EventSubmissionForm() {
               className="form-input"
               placeholder="https://maps.google.com/..."
             />
-            <p className="mt-1 text-xs font-bold text-stone-500">
+            <p className="mt-1 font-mono text-xs text-cacao">
               Optional. Paste a Google or Apple Maps link for this venue.
             </p>
           </Field>
@@ -251,14 +254,23 @@ export function EventSubmissionForm() {
           required
           className="md:col-span-2"
         />
-        <Field label="Link or ticket info" required>
+        <Field label="Entry fee" required>
           <input
             required
+            name="entry_fee"
+            value={formState.entry_fee}
+            onChange={(e) => updateField("entry_fee", e.target.value)}
+            className="form-input"
+            placeholder="Free entry, €10, Pay what you can, €12 at the door…"
+          />
+        </Field>
+        <Field label="Links or booking info">
+          <input
             name="link_or_ticket_info"
             value={formState.link_or_ticket_info}
             onChange={(e) => updateField("link_or_ticket_info", e.target.value)}
             className="form-input"
-            placeholder="URL, email, free entry, or door price"
+            placeholder="Website, booking URL, email, or Eventbrite link"
           />
         </Field>
         <Field label="Image URL">
@@ -303,7 +315,7 @@ export function EventSubmissionForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-6 w-full rounded-full border-2 border-ink bg-corkRed px-6 py-4 text-base font-black text-white shadow-poster transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        className="button-primary mt-6 bg-corkRed text-creamLight disabled:cursor-not-allowed disabled:opacity-60"
       >
         {isSubmitting ? "Submitting..." : "Submit for approval"}
       </button>
@@ -320,8 +332,8 @@ type FieldProps = {
 
 function Field({ label, required = false, className = "", children }: FieldProps) {
   return (
-    <label className={`space-y-2 text-sm font-black ${className}`}>
-      <span>
+    <label className={`space-y-2 ${className}`}>
+      <span className="font-mono text-[11px] font-bold uppercase tracking-[0.15em] text-ink">
         {label}
         {required ? <span className="text-corkRed"> *</span> : null}
       </span>

@@ -38,7 +38,7 @@ export function AboutPage() {
           >
             <p className="font-display text-4xl font-black italic text-corkRed">{no}</p>
             <h2 className="mt-2 font-display text-2xl font-black text-ink">{title}</h2>
-            <p className="mt-3 text-sm leading-6 text-cacaoMid">{body}</p>
+            <p className="mt-3 text-sm leading-relaxed text-cacaoMid">{body}</p>
           </section>
         ))}
       </div>
@@ -47,7 +47,7 @@ export function AboutPage() {
         <h2 className="font-display text-3xl font-black text-posterYellow sm:text-4xl">
           Add your event
         </h2>
-        <p className="mx-auto mt-3 max-w-xl font-mono text-sm uppercase tracking-[0.1em] text-paper/80">
+        <p className="mx-auto mt-3 max-w-xl font-mono text-xs uppercase tracking-[0.08em] text-paper/80">
           Free to list · reviewed before it goes public
         </p>
         <Link to="/submit" className="button-primary mt-6 bg-corkRed text-creamLight">

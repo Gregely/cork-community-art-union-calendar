@@ -9,16 +9,17 @@ import { getAllApprovedEvents } from "../lib/eventQueries";
 import { disciplines, getEventDisciplines } from "../types/event";
 import type { Event } from "../types/event";
 
+// Mirrors the DisciplineBadge risograph palette exactly.
 const disciplineActiveColors: Record<string, string> = {
-  Exhibition: "bg-pinkPunch text-ink border-pinkPunch",
-  Music: "bg-grass text-creamLight border-grass",
-  Theatre: "bg-corkRed text-creamLight border-corkRed",
-  Film: "bg-ink text-creamLight border-ink",
-  Dance: "bg-cacao text-creamLight border-cacao",
-  Poetry: "bg-cacaoMid text-creamLight border-cacaoMid",
-  Workshop: "bg-posterYellow text-ink border-posterYellow",
-  Talk: "bg-corkRed text-creamLight border-corkRed",
-  Community: "bg-grass text-creamLight border-grass",
+  Exhibition: "bg-[#c0513a] text-creamLight border-[#c0513a]",
+  Music:      "bg-[#4a6b28] text-creamLight border-[#4a6b28]",
+  Theatre:    "bg-corkRed   text-creamLight border-corkRed",
+  Film:       "bg-[#243040] text-creamLight border-[#243040]",
+  Dance:      "bg-[#8b4020] text-creamLight border-[#8b4020]",
+  Poetry:     "bg-[#6b3a7a] text-creamLight border-[#6b3a7a]",
+  Workshop:   "bg-[#b87a12] text-ink        border-[#b87a12]",
+  Talk:       "bg-[#8b3218] text-creamLight border-[#8b3218]",
+  Community:  "bg-[#2a6838] text-creamLight border-[#2a6838]",
 };
 
 function getTodayLocalDate(): string {
@@ -106,7 +107,7 @@ export function HomePage() {
             {/* Eyebrow stamp */}
             <div className="mb-5">
               <span
-                className="inline-flex items-center border-2 px-3 py-1.5 font-mono text-sm font-bold uppercase tracking-[0.12em]"
+                className="inline-flex items-center border-2 px-3 py-1.5 font-mono text-xs font-bold uppercase tracking-[0.08em]"
                 style={{
                   color: "#b8421f",
                   borderColor: "#b8421f",
@@ -128,7 +129,7 @@ export function HomePage() {
               </span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-base leading-7 text-cacaoMid sm:text-lg sm:leading-8">
+            <p className="mt-6 max-w-xl text-base leading-[1.75] text-cacaoMid sm:text-lg">
               A shared listings board for Cork's creative and cultural events. Gigs, readings,
               exhibitions, workshops, theatre, film, open mics, and community happenings.
             </p>
@@ -182,7 +183,7 @@ export function HomePage() {
               Fresh listings
             </p>
             <h2 className="font-display text-4xl font-black text-ink sm:text-5xl">Coming up</h2>
-            <p className="mt-1 text-sm text-cacaoMid">The next things going on in Cork's cultural scene.</p>
+            <p className="mt-1 font-mono text-xs tracking-[0.06em] text-cacao">The next things going on in Cork's cultural scene.</p>
           </div>
           <Link
             to={advancedSearchUrl}
