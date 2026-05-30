@@ -58,26 +58,17 @@ export function EventSubmissionForm() {
       ...curr,
       venue: venueName,
       venue_id: venueId,
-      // Clear manual maps link when a saved venue is selected
       manual_maps_url: venueId !== null ? "" : curr.manual_maps_url,
     }));
   }
 
   function updateOrganiser(organiserName: string, organiserId: string | null) {
-    setFormState((curr) => ({
-      ...curr,
-      organiser: organiserName,
-      organiser_id: organiserId,
-    }));
+    setFormState((curr) => ({ ...curr, organiser: organiserName, organiser_id: organiserId }));
   }
 
   function getTodayLocalDate() {
     const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   }
 
   function validateForm() {
@@ -101,11 +92,8 @@ export function EventSubmissionForm() {
     }
 
     if (formState.manual_maps_url.trim()) {
-      try {
-        new URL(formState.manual_maps_url.trim());
-      } catch {
-        return "Maps link must be a valid URL (e.g. https://maps.google.com/...).";
-      }
+      try { new URL(formState.manual_maps_url.trim()); }
+      catch { return "Maps link must be a valid URL (e.g. https://maps.google.com/...)."; }
     }
 
     return "";
@@ -117,11 +105,7 @@ export function EventSubmissionForm() {
     setErrorMessage("");
 
     const validationMessage = validateForm();
-
-    if (validationMessage) {
-      setErrorMessage(validationMessage);
-      return;
-    }
+    if (validationMessage) { setErrorMessage(validationMessage); return; }
 
     const input: EventInsert = {
       title: formState.title.trim(),
@@ -226,7 +210,6 @@ export function EventSubmissionForm() {
           selectedVenueId={formState.venue_id}
           onChange={updateVenue}
         />
-        {/* Maps link — only when no saved venue is selected */}
         {isManualVenue && formState.venue.trim() ? (
           <Field label="Maps link">
             <input
@@ -280,8 +263,11 @@ export function EventSubmissionForm() {
             value={formState.image_url}
             onChange={(e) => updateField("image_url", e.target.value)}
             className="form-input"
-            placeholder="https://..."
+            placeholder="https://example.com/poster.jpg"
           />
+          <p className="mt-1 font-mono text-xs text-cacao">
+            Paste a link to an event poster or image, if you have one.
+          </p>
         </Field>
         <Field label="Submitter name">
           <input
@@ -317,7 +303,7 @@ export function EventSubmissionForm() {
         disabled={isSubmitting}
         className="button-primary mt-6 bg-corkRed text-creamLight disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isSubmitting ? "Submitting..." : "Submit for approval"}
+        {isSubmitting ? "Submitting…" : "Submit for approval"}
       </button>
     </form>
   );

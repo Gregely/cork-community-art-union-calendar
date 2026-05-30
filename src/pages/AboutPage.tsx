@@ -27,7 +27,7 @@ export function AboutPage() {
     <PageShell
       eyebrow="About"
       title="Cork Culture Board"
-      intro="A free listings board where arts groups, venues, and organisers can share what's happening across Cork city. A Cork Community Arts Union project."
+      intro="A free listings board where arts groups, venues, and organisers can share what's happening across Cork city. A Cork Community Arts Organisation project."
     >
       <div className="grid gap-5 md:grid-cols-3">
         {cards.map(({ no, title, body, tilt }) => (

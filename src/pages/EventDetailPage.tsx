@@ -205,7 +205,7 @@ export function EventDetailPage() {
               Cork Culture Board
             </span>
             <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-cacao/80">
-              By CCAU
+              By C&#x2019;CAO
             </span>
           </div>
         </article>

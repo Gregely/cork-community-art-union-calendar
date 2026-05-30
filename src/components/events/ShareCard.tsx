@@ -240,7 +240,7 @@ export function ShareCard({ event }: ShareCardProps) {
               margin: 0,
             }}
           >
-            Cork Culture Board &nbsp;·&nbsp; By Cork Community Arts Union
+            Cork Culture Board &nbsp;·&nbsp; By C&#x2019;CAO
           </p>
         </div>
       </div>
