@@ -27,6 +27,7 @@ export type Event = {
   entry_fee: string | null;
   link_or_ticket_info: string;
   image_url: string | null;
+  image_storage_path: string | null;
   manual_maps_url: string | null;
   status: EventStatus;
   submitter_name: string | null;
@@ -56,6 +57,7 @@ export type EventInsert = {
   entry_fee?: string | null;
   link_or_ticket_info: string;
   image_url?: string | null;
+  image_storage_path?: string | null;
   manual_maps_url?: string | null;
   status?: EventStatus;
   submitter_name?: string | null;

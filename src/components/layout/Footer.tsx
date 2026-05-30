@@ -23,7 +23,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-4 pb-8 pt-14 sm:grid-cols-3 sm:gap-12 sm:px-6">
         <div>
           <p className="font-display text-xl font-black text-posterYellow">
-            Cork Community Arts Union
+            Cork Community Arts Organisation
           </p>
           <p className="mt-3 font-mono text-xs leading-relaxed tracking-[0.04em] opacity-75">
             A shared listings board, run by volunteers. No ads, no algorithm — just what's on.
@@ -41,7 +41,7 @@ export function Footer() {
               Submit an event
             </Link>
             <Link to="/about" className="font-mono text-sm text-paper hover:text-posterYellow">
-              About CCAU
+              About C&#x2019;CAO
             </Link>
           </div>
         </div>
@@ -59,7 +59,7 @@ export function Footer() {
       <div className="mx-auto max-w-6xl border-t border-paper/20 px-4 py-5 sm:px-6">
         <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
           <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-paper/60">
-            © 2026 CCAU · Pasted in Cork
+            © 2026 C&#x2019;CAO · Pasted in Cork
           </span>
           <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-paper/60">
             Submit an event, keep the board fresh

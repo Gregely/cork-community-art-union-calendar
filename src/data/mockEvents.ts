@@ -5,6 +5,7 @@ const mockTimestamps = {
   organiser_id: null,
   manual_maps_url: null,
   entry_fee: null,
+  image_storage_path: null,
   submitter_name: null,
   submitter_email: null,
   admin_notes: null,

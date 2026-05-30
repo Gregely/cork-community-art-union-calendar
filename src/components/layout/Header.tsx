@@ -16,7 +16,7 @@ export function Header() {
           aria-label="Cork Culture Board home"
         >
           <span className="flex items-baseline gap-2">
-            <span className="font-display text-2xl font-black text-ink sm:text-3xl">CCAU</span>
+            <span className="font-display text-2xl font-black text-ink sm:text-3xl">C&#x2019;CAO</span>
             <span className="font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-cacao sm:text-[11px]">
               /kə-ˈkau/
             </span>

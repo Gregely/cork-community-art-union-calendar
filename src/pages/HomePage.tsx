@@ -144,7 +144,7 @@ export function HomePage() {
             </div>
 
             <p className="mt-6 font-mono text-xs uppercase tracking-[0.1em] text-cacao">
-              Brewed by <strong className="text-ink">Cork Community Arts Union</strong>
+              Brewed by <strong className="text-ink">C&#x2019;CAO</strong>
               <span className="ml-1.5 normal-case tracking-normal opacity-70">
                 — said like cacao
               </span>
